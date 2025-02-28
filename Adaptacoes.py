@@ -26,9 +26,15 @@ adaptações = [
     " O jogo possui um modo de jogo para jogadores com deficiência visual",
 ]
 
+# Função para calcular a escala
+def calculate_scale(screen_width, screen_height, num_lines):
+    line_height = (screen_height - 100) // num_lines
+    return line_height
+
 # Função para exibir o menu de adaptações
 def exibir_menu_adaptações(screen):
     running = True
+    line_height = calculate_scale(screen_width, screen_height, len(adaptações))
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -45,7 +51,7 @@ def exibir_menu_adaptações(screen):
         for line in adaptações:
             text = font.render(line, True, (255, 255, 255))
             screen.blit(text, (50, y_offset))
-            y_offset += 40
+            y_offset += line_height
 
         # Atualizar a tela
         pygame.display.flip()

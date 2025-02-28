@@ -27,7 +27,7 @@ regras_de_jogo = [
     "3. Se duas cartas viradas forem iguais, elas permanecem viradas.",
     "4. Se não forem iguais, elas voltam a ficar viradas para baixo.",
     "5. O jogo termina quando todos os pares forem encontrados.",
-    "Pressione ESC para voltar ao menu principal."
+
 ]
 
 # Função para exibir o menu de regras
