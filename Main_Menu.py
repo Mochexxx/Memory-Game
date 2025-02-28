@@ -1,9 +1,7 @@
 import pygame
 import random
-import Menu_de_regras  # Importar o módulo do menu de regras
-import Adaptacoes
-import Como_jogar
-import estrutura_de_jogo
+import main_menu_functions  # Import the new module
+import game_logic  # Import the game logic module
 
 # Inicializa o pygame
 pygame.init()
@@ -16,74 +14,68 @@ screen_height = 960
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Jogo de Memória")
 
-# Carregar a imagem de fundo
-background = pygame.image.load("imagem.png")  # diretório da imagem (cor de rosa)
-background = pygame.transform.scale(background, (screen_width, screen_height))
+# Cor de fundo
+background_color = (255, 182, 193)  # Cor de fundo (rosa claro)
 
 # Fonte para o texto
 font = pygame.font.Font(None, 74)
 
-# Função para desenhar botões
-def draw_button(screen, text, font, color, rect):
-    pygame.draw.rect(screen, color, rect)
+# Função para desenhar botões com cantos arredondados
+def draw_button(screen, text, font, color, rect, radius=20):
+    pygame.draw.rect(screen, color, rect, border_radius=radius)
     text_surface = font.render(text, True, (255, 255, 255))
     text_rect = text_surface.get_rect(center=rect.center)
     screen.blit(text_surface, text_rect)
 
-# Função para abrir o menu de regras
-def abrir_menu_regras():
-    Menu_de_regras.exibir_menu_regras(screen)
+# Função para calcular a escala
+def calculate_scale(screen_width, screen_height, num_buttons):
+    rows = cols = int(num_buttons ** 0.5)
+    button_width = (screen_width - (cols + 1) * button_spacing) // cols
+    button_height = (screen_height - (rows + 1) * button_spacing) // rows
+    return button_width, button_height, rows, cols
 
-# Funções para outros menus (exemplo)
-def adaptacoes1():
-    Adaptacoes.exibir_menu_adaptações(screen)
+# Definir a área de jogo
+game_area = pygame.Rect(100, 100, 1400, 760)  # Área de jogo delimitada
 
-def como_jogar2():
-    Como_jogar.exibir_menu_como_jogar(screen)
+# Função para redimensionar a tela mantendo o aspect ratio
+def resize_screen(width, height):
+    global screen, buttons, game_area
+    screen = pygame.display.set_mode((width, height), pygame.RESIZABLE)
+    game_area = pygame.Rect(100, 100, width - 200, height - 200)  # Ajustar a área de jogo
+    button_width, button_height, rows, cols = calculate_scale(width, height, num_buttons)
+    large_button_width = button_width
+    large_button_height = button_height
+    small_button_width = button_width // 2
+    small_button_height = button_height // 2
+    buttons[0]["rect"] = pygame.Rect(width // 4 - small_button_width // 2, height // 2 - small_button_height, small_button_width, small_button_height)
+    buttons[1]["rect"] = pygame.Rect(3 * width // 4 - small_button_width // 2, height // 2 - small_button_height, small_button_width, small_button_height)
+    buttons[2]["rect"] = pygame.Rect(width // 4 - small_button_width // 2, height // 2, small_button_width, small_button_height)
+    buttons[3]["rect"] = pygame.Rect(3 * width // 4 - small_button_width // 2, height // 2, small_button_width, small_button_height)
+    buttons[4]["rect"] = pygame.Rect(width // 2 - large_button_width // 4, height // 4 - large_button_height // 2, large_button_width // 2, large_button_height // 2)
+    buttons[5]["rect"] = pygame.Rect(20, height - small_button_height - 20, small_button_width, small_button_height)
+    buttons[6]["rect"] = pygame.Rect(width - small_button_width - 20, height - small_button_height - 20, small_button_width, small_button_height)
 
-def estrutura_de_jogo3():
-    estrutura_de_jogo.exibir_menu_estrutura_de_jogo(screen)
+# Variável para controlar o modo fullscreen
+fullscreen = False
+
+# Função para alternar o modo fullscreen
+def toggle_fullscreen():
+    global fullscreen, screen
+    fullscreen = not fullscreen
+    if fullscreen:
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
 
 # Configurações dos botões
-button_width = 300
-button_height = 100
-button_color = (0, 128, 255)
-button_spacing = 50
-
-buttons = [
-    {"text": "Menu de Regras", "rect": pygame.Rect(50, screen_height - 250, button_width, button_height), "action": abrir_menu_regras},
-    {"text": "Adaptações", "rect": pygame.Rect(50 + button_width + button_spacing, screen_height - 250, button_width, button_height), "action": adaptacoes1},
-    {"text": "Como Jogar", "rect": pygame.Rect(50, screen_height - 250 + button_height + button_spacing, button_width, button_height), "action": como_jogar2},
-    {"text": "Estrutura do Jogo", "rect": pygame.Rect(50 + button_width + button_spacing, screen_height - 250 + button_height + button_spacing, button_width, button_height), "action": estrutura_de_jogo3},
-    {"text": "Quit", "rect": pygame.Rect(screen_width - button_width - 50, screen_height - button_height - 50, button_width, button_height), "action": pygame.quit}
-]
+button_spacing = 20  # Reduced spacing
+num_buttons = 7  # Increased number of buttons
+button_color = (0, 128, 0)  # Define button color
+button_width, button_height, rows, cols = calculate_scale(screen_width, screen_height, num_buttons)
+large_button_width = button_width
+large_button_height = button_height
+small_button_width = button_width // 2
+small_button_height = button_height // 2
 
 # Loop principal do jogo
-def main_menu():
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Verifica se o botão esquerdo do mouse foi pressionado
-                    for button in buttons:
-                        if button["rect"].collidepoint(event.pos):
-                            button["action"]()
-                            if button["text"] == "Quit":
-                                running = False
-
-        # Desenhar a imagem de fundo
-        screen.blit(background, (0, 0))
-
-        # Desenhar os botões
-        for button in buttons:
-            draw_button(screen, button["text"], font, button_color, button["rect"])
-
-        # Atualizar a tela
-        pygame.display.flip()
-
-    pygame.quit()
-
-if __name__ == "__main__":
-    main_menu()
+main_menu_functions.main_menu(screen, game_logic.exibir_jogo)
