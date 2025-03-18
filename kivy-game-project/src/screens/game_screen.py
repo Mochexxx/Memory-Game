@@ -4,7 +4,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
+from kivy.app import App
+from kivy.core.window import Window
 import os
+import math
 from logic.game_logic import start_game, check_win_condition
 
 class GameScreen(Screen):
@@ -29,8 +32,8 @@ class GameScreen(Screen):
         hud_layout.add_widget(self.score_label)
         hud_layout.add_widget(self.timer_label)
         
-        # Create grid layout for cards
-        self.layout = GridLayout(cols=4, spacing=10, padding=50)
+        # Create grid layout for cards - we'll adjust columns later
+        self.layout = GridLayout(spacing=10, padding=20)
         
         # Add both layouts to the main layout
         main_layout.add_widget(hud_layout)
@@ -45,6 +48,117 @@ class GameScreen(Screen):
         # Track current theme and difficulty for replay
         self.current_theme = None
         self.current_difficulty = None
+
+        # Get accessibility settings from the app
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            self.accessibility_mode = app.settings.get('visual_feedback', True)
+            self.colorblind_mode = app.settings.get('colorblind_mode', False)
+            self.audio_mode = app.settings.get('audio_assist', False)
+        else:
+            self.accessibility_mode = True
+            self.colorblind_mode = False
+            self.audio_mode = False
+            
+        # Bind to window resize event
+        Window.bind(on_resize=self.on_window_resize)
+    
+    def calculate_optimal_grid(self, num_cards):
+        """Calculate the optimal number of columns and card size based on screen dimensions"""
+        # Card aspect ratio (height/width)
+        card_aspect_ratio = 1.5  # standard card ratio is 3:2
+        
+        # Get available space (accounting for padding that will be adjusted)
+        screen_width = Window.width
+        screen_height = Window.height
+        
+        # Calculate space available for cards (accounting for HUD)
+        available_width = screen_width - 40  # minimum side padding
+        available_height = screen_height - 100  # account for HUD and minimal padding
+        
+        # For a uniform grid, we want rows and columns to be as close as possible
+        # Taking into account the card aspect ratio
+        # First, find the square root of card count
+        sqrt_count = math.sqrt(num_cards)
+        
+        # Calculate ideal grid dimensions adjusted for aspect ratio
+        # For a perfectly uniform grid, we want:
+        # cols/rows = available_width/available_height * 1/card_aspect_ratio
+        screen_ratio = available_width / available_height / card_aspect_ratio
+        
+        # Calculate ideal columns and rows
+        ideal_cols = math.sqrt(num_cards * screen_ratio)
+        ideal_rows = num_cards / ideal_cols
+        
+        # Round to integers (favor more columns)
+        cols = round(ideal_cols)
+        rows = math.ceil(num_cards / cols)
+        
+        # Check if we need to adjust for better fit
+        # Try one less and one more column and see which gives more uniform results
+        options = []
+        for test_cols in [max(1, cols-1), cols, cols+1]:
+            test_rows = math.ceil(num_cards / test_cols)
+            # Calculate card dimensions for this configuration
+            c_width = (available_width - (test_cols - 1) * self.layout.spacing[0]) / test_cols
+            c_height = c_width * card_aspect_ratio
+            
+            # Check if cards fit vertically
+            if test_rows * c_height + (test_rows - 1) * self.layout.spacing[1] > available_height:
+                # Adjust height to fit
+                c_height = (available_height - (test_rows - 1) * self.layout.spacing[1]) / test_rows
+                c_width = c_height / card_aspect_ratio
+            
+            # Calculate how uniform the grid is
+            # Lower score = more uniform
+            # We penalize empty cells and non-square layouts
+            empty_cells = (test_rows * test_cols) - num_cards
+            aspect_diff = abs(1 - ((c_width * test_cols) / (c_height * test_rows)))
+            uniformity_score = empty_cells + aspect_diff * 5
+            
+            options.append((test_cols, c_width, c_height, uniformity_score))
+        
+        # Choose the most uniform option
+        options.sort(key=lambda x: x[3])
+        cols, card_width, card_height = options[0][:3]
+        rows = math.ceil(num_cards / cols)
+        
+        # Calculate dynamic padding to center the grid
+        horizontal_padding = (screen_width - (cols * card_width + (cols - 1) * self.layout.spacing[0])) / 2
+        vertical_padding = (available_height - (rows * card_height + (rows - 1) * self.layout.spacing[1])) / 2
+        vertical_padding = max(10, vertical_padding)  # Ensure minimum padding
+        
+        # Update layout padding for centering
+        self.layout.padding = [horizontal_padding, vertical_padding, horizontal_padding, vertical_padding]
+        
+        # Ensure consistent spacing between cards
+        self.layout.spacing = [10, 10]
+        
+        print(f"Grid: {cols}x{rows} for {num_cards} cards, {(cols*rows)-num_cards} empty cells")
+        
+        return cols, card_width, card_height
+    
+    def on_window_resize(self, instance, width, height):
+        """Handle window resize events by recalculating card layout"""
+        if self.cards:
+            # Recalculate and update the layout
+            self.update_card_layout()
+    
+    def update_card_layout(self):
+        """Update the card layout based on current screen dimensions"""
+        if not self.cards:
+            return
+            
+        num_cards = len(self.cards)
+        optimal_cols, card_width, card_height = self.calculate_optimal_grid(num_cards)
+        
+        # Update grid columns
+        self.layout.cols = optimal_cols
+        
+        # Update card sizes
+        for widget in self.layout.children:
+            widget.size_hint = (None, None)
+            widget.size = (card_width, card_height)
     
     def start_timer(self):
         # Reset and start the timer
@@ -71,8 +185,17 @@ class GameScreen(Screen):
         self.current_theme = theme
         self.current_difficulty = num_cards
         
+        # Calculate optimal grid layout
+        optimal_cols, card_width, card_height = self.calculate_optimal_grid(len(self.cards))
+        self.layout.cols = optimal_cols
+        
         for card in self.cards:
-            btn = Button(size_hint=(None, None), size=(100, 150), background_normal='back.png', background_down='back.png')
+            btn = Button(
+                size_hint=(None, None),
+                size=(card_width, card_height),
+                background_normal='back.png',
+                background_down='back.png'
+            )
             btn.bind(on_release=lambda instance, c=card: self.flip_card(instance, c))
             self.layout.add_widget(btn)
         
@@ -81,6 +204,15 @@ class GameScreen(Screen):
         self.score_label.text = "Score: 0"
         self.stop_timer()  # Make sure to stop any existing timer
         self.start_timer()  # Start a new timer
+
+        # Apply accessibility settings
+        if self.colorblind_mode:
+            # Apply colorblind-friendly visuals
+            print("Using colorblind-friendly visuals")
+        
+        if self.audio_mode:
+            # Initialize audio assistance
+            print("Audio assistance enabled")
     
     def flip_card(self, instance, card):
         # Prevent flipping cards while checking a match or if card is already flipped/matched

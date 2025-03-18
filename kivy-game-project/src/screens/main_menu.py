@@ -32,8 +32,7 @@ class MainMenu(Screen):
         self.manager.current = 'theme_selection'
     
     def show_options(self, instance):
-        # Implement options screen if needed
-        pass
+        self.manager.current = 'options_screen'
     
     def show_how_to_play(self, instance):
         self.manager.current = 'how_to_play_screen'
