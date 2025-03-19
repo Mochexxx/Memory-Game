@@ -6,6 +6,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.clock import Clock
 from kivy.app import App
 from kivy.core.window import Window
+from kivy.animation import Animation
+from kivy.uix.image import Image
 import os
 import math
 from logic.game_logic import start_game, check_win_condition
@@ -62,6 +64,9 @@ class GameScreen(Screen):
             
         # Bind to window resize event
         Window.bind(on_resize=self.on_window_resize)
+        
+        self.multiplier = 1  # Initialize score multiplier
+        self.consecutive_matches = 0  # Track consecutive matches
     
     def calculate_optimal_grid(self, num_cards):
         """Calculate the optimal number of columns and card size based on screen dimensions"""
@@ -205,6 +210,8 @@ class GameScreen(Screen):
         self.stop_timer()  # Make sure to stop any existing timer
         self.start_timer()  # Start a new timer
 
+        self.lives = 3  # Reset lives for new game
+
         # Apply accessibility settings
         if self.colorblind_mode:
             # Apply colorblind-friendly visuals
@@ -237,10 +244,18 @@ class GameScreen(Screen):
         if self.selected_cards[0][1]["image"] == self.selected_cards[1][1]["image"]:
             self.selected_cards[0][1]["matched"] = True
             self.selected_cards[1][1]["matched"] = True
-            self.score += 1
+            self.consecutive_matches += 1
+            self.multiplier = min(self.consecutive_matches, 5)  # Cap multiplier at 5
+            self.score += 1 * self.multiplier
             self.score_label.text = f"Score: {self.score}"
         else:
-            # Only for non-matching cards, flip them back
+            self.consecutive_matches = 0
+            self.multiplier = 1
+            if self.lives > 0:
+                self.lives -= 1
+            else:
+                self.score = max(self.score - 1, 0)  # Ensure score does not go below zero
+                self.score_label.text = f"Score: {self.score}"
             self.selected_cards[0][1]["flipped"] = False
             self.selected_cards[1][1]["flipped"] = False
             self.selected_cards[0][0].background_normal = 'back.png'

@@ -8,6 +8,7 @@ from kivy.uix.switch import Switch
 from kivy.uix.slider import Slider
 from kivy.app import App
 from kivy.metrics import dp
+from kivy.core.window import Window
 
 class OptionsScreen(Screen):
     def __init__(self, **kwargs):
@@ -55,6 +56,14 @@ class OptionsScreen(Screen):
             self.visual_feedback_switch_factory
         )
         content_layout.add_widget(option_layout3)
+        
+        # Fullscreen mode with explanation
+        option_layout_fullscreen = self.create_option_layout(
+            "Modo Tela Cheia", 
+            "Alterna entre modo janela e tela cheia",
+            self.fullscreen_switch_factory
+        )
+        content_layout.add_widget(option_layout_fullscreen)
         
         # Text size with explanation
         option_layout4 = self.create_option_layout(
@@ -156,6 +165,11 @@ class OptionsScreen(Screen):
         self.text_size_slider.bind(value=self.on_text_size_change)
         return self.text_size_slider
     
+    def fullscreen_switch_factory(self):
+        self.fullscreen_switch = Switch(active=Window.fullscreen)
+        self.fullscreen_switch.bind(active=self.on_fullscreen_toggle)
+        return self.fullscreen_switch
+    
     def get_font_size(self, base_size):
         # Scale font size based on any app-level settings
         app = App.get_running_app()
@@ -175,6 +189,8 @@ class OptionsScreen(Screen):
             self.audio_assist_switch.active = app.settings.get('audio_assist', False)
             self.visual_feedback_switch.active = app.settings.get('visual_feedback', True)
             self.text_size_slider.value = app.settings.get('text_size_factor', 1.0)
+            # Set fullscreen switch according to saved setting, defaulting to current window state
+            self.fullscreen_switch.active = app.settings.get('fullscreen', Window.fullscreen)
     
     def on_colorblind_toggle(self, instance, value):
         print(f"Colorblind mode: {'on' if value else 'off'}")
@@ -188,6 +204,10 @@ class OptionsScreen(Screen):
     def on_text_size_change(self, instance, value):
         print(f"Text size factor: {value}")
     
+    def on_fullscreen_toggle(self, instance, value):
+        Window.fullscreen = value
+        print(f"Fullscreen mode: {'on' if value else 'off'}")
+    
     def save_options(self, instance):
         # Save all settings to a global app state or file
         app = App.get_running_app()
@@ -198,6 +218,7 @@ class OptionsScreen(Screen):
         app.settings['audio_assist'] = self.audio_assist_switch.active
         app.settings['visual_feedback'] = self.visual_feedback_switch.active
         app.settings['text_size_factor'] = self.text_size_slider.value
+        app.settings['fullscreen'] = self.fullscreen_switch.active
         
         print("Settings saved!")
         self.go_back(instance)

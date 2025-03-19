@@ -13,6 +13,7 @@ class DifficultySelectionScreen(Screen):
         
         difficulties = [
             ("Fácil (8 cartas)", self.select_difficulty, 8),
+            ("Médio (16 cartas)", self.select_difficulty, 16),
             ("Difícil (32 cartas)", self.select_difficulty, 32),
             ("Voltar", self.go_back, None)
         ]
