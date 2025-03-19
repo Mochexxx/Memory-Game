@@ -17,7 +17,7 @@ class InformationScreenBase(Screen):
         instance.height = value[1]
     
     def go_back(self, instance):
-        self.manager.current = 'main_menu'
+        self.manager.current = 'rules_submenu'
 
 class AdaptationsScreen(InformationScreenBase):
     def __init__(self, **kwargs):

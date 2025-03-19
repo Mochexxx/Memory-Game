@@ -1,23 +1,21 @@
-from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 
-class MainMenu(Screen):
+class RulesSubmenu(Screen):
     def __init__(self, **kwargs):
-        super(MainMenu, self).__init__(**kwargs)
+        super(RulesSubmenu, self).__init__(**kwargs)
         layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
-        title = Label(text="Jogo de Memória", font_size=74, size_hint=(1, 0.2))
+        title = Label(text="Regras", font_size=74, size_hint=(1, 0.2))
         layout.add_widget(title)
         
         buttons = [
-            ("Iniciar Jogo", self.start_game),
-            ("Opções", self.show_options),
+            ("Como Jogar", self.show_how_to_play),
+            ("Estrutura do Jogo", self.show_game_structure),
             ("Adaptações", self.show_adaptations),
-            ("Regras", self.show_rules),
-            ("Sair", self.quit_game)
+            ("Voltar", self.go_back)
         ]
         
         for text, callback in buttons:
@@ -27,17 +25,14 @@ class MainMenu(Screen):
         
         self.add_widget(layout)
     
-    def start_game(self, instance):
-        self.manager.current = 'theme_selection'
+    def show_how_to_play(self, instance):
+        self.manager.current = 'how_to_play_screen'
     
-    def show_options(self, instance):
-        self.manager.current = 'options_screen'
+    def show_game_structure(self, instance):
+        self.manager.current = 'game_structure_screen'
     
     def show_adaptations(self, instance):
         self.manager.current = 'adaptations_screen'
     
-    def show_rules(self, instance):
-        self.manager.current = 'rules_submenu'
-    
-    def quit_game(self, instance):
-        App.get_running_app().stop()
+    def go_back(self, instance):
+        self.manager.current = 'main_menu'

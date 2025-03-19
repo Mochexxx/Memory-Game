@@ -1,18 +1,21 @@
 from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager
+from kivy.core.window import Window
 
 # Import screens
 from screens.main_menu import MainMenu
 from screens.game_screen import GameScreen
 from screens.theme_selection_screen import ThemeSelectionScreen
 from screens.difficulty_selection_screen import DifficultySelectionScreen
-from screens.options_screen import OptionsScreen # Add this import
+from screens.options_screen import OptionsScreen
 from screens.win_screen import WinScreen
 from screens.information_screens import (
     AdaptationsScreen,
     HowToPlayScreen,
     GameStructureScreen
 )
+from screens.rules_submenu import RulesSubmenu
+from screens.adaptations_screen import AdaptationsScreen  # Add this import
 
 class MyScreenManager(ScreenManager):
     pass
@@ -29,16 +32,18 @@ class MemoryGameApp(App):
         }
     
     def build(self):
+        Window.fullscreen = True  # Force fullscreen mode
         sm = MyScreenManager()
         sm.add_widget(MainMenu(name='main_menu'))
         sm.add_widget(GameScreen(name='game_screen'))
         sm.add_widget(ThemeSelectionScreen(name='theme_selection'))
         sm.add_widget(DifficultySelectionScreen(name='difficulty_selection'))
-        sm.add_widget(OptionsScreen(name='options_screen')) # Add this line
-        sm.add_widget(AdaptationsScreen(name='adaptations_screen'))
+        sm.add_widget(OptionsScreen(name='options_screen'))
+        sm.add_widget(AdaptationsScreen(name='adaptations_screen'))  # Add this line
         sm.add_widget(HowToPlayScreen(name='how_to_play_screen'))
         sm.add_widget(GameStructureScreen(name='game_structure_screen'))
         sm.add_widget(WinScreen(name='win_screen'))
+        sm.add_widget(RulesSubmenu(name='rules_submenu'))
         return sm
 
 if __name__ == '__main__':

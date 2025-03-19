@@ -6,15 +6,15 @@ from kivy.uix.label import Label
 class ThemeSelectionScreen(Screen):
     def __init__(self, **kwargs):
         super(ThemeSelectionScreen, self).__init__(**kwargs)
-        self.selected_theme = "C:\\Users\\pedri\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_animais"  # Default theme
+        self.selected_theme = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_animais"  # Default theme
         layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
         title = Label(text="Seleção de Tema", font_size=74, size_hint=(1, 0.2))
         layout.add_widget(title)
         
         themes = [
-            ("Tema Animais", self.select_theme_animals, "C:\\Users\\pedri\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_animais"),
-            ("Tema Números", self.select_theme_numbers, "C:\\Users\\pedri\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_numeros"),
+            ("Tema Animais", self.select_theme_animals, "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_animais"),
+            ("Tema Números", self.select_theme_numbers, "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\baralho_numeros"),
             ("Voltar", self.go_back, None)
         ]
         

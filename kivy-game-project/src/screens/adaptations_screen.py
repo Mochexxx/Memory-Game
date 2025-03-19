@@ -1,25 +1,22 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.switch import Switch
-from kivy.uix.slider import Slider
 from kivy.app import App
 from kivy.metrics import dp
-from kivy.core.window import Window
 
-class OptionsScreen(Screen):
+class AdaptationsScreen(Screen):
     def __init__(self, **kwargs):
-        super(OptionsScreen, self).__init__(**kwargs)
+        super(AdaptationsScreen, self).__init__(**kwargs)
         
         # Main layout
         main_layout = BoxLayout(orientation='vertical', spacing=dp(10), padding=dp(20))
         
         # Title with dynamic font size
         title = Label(
-            text="Opções do Jogo",
+            text="Opções de Acessibilidade",
             font_size=self.get_font_size(60),
             size_hint=(1, 0.15),
             halign='center',
@@ -33,38 +30,29 @@ class OptionsScreen(Screen):
         content_layout = BoxLayout(orientation='vertical', spacing=dp(15), padding=dp(10), size_hint_y=None)
         content_layout.bind(minimum_height=content_layout.setter('height'))
         
-        # Fullscreen mode with explanation
-        option_layout_fullscreen = self.create_option_layout(
-            "Modo Tela Cheia", 
-            "Alterna entre modo janela e tela cheia",
-            self.fullscreen_switch_factory
+        # Colorblind mode with explanation
+        option_layout1 = self.create_option_layout(
+            "Modo Daltonismo", 
+            "Aumenta o contraste e usa cores adequadas para daltonismo",
+            self.colorblind_switch_factory
         )
-        content_layout.add_widget(option_layout_fullscreen)
+        content_layout.add_widget(option_layout1)
         
-        # Text size with explanation
-        option_layout_text_size = self.create_option_layout(
-            "Tamanho do Texto", 
-            "Controla o tamanho de todos os textos no jogo",
-            self.text_size_slider_factory,
-            is_slider=True
+        # Audio assistance with explanation
+        option_layout2 = self.create_option_layout(
+            "Assistência por Áudio", 
+            "Fornece dicas sonoras e narração para jogadores com deficiência visual",
+            self.audio_assist_switch_factory
         )
-        content_layout.add_widget(option_layout_text_size)
+        content_layout.add_widget(option_layout2)
         
-        # Sound effects with explanation
-        option_layout_sound_effects = self.create_option_layout(
-            "Efeitos Sonoros", 
-            "Ativa ou desativa os efeitos sonoros do jogo",
-            self.sound_effects_switch_factory
+        # Visual feedback with explanation
+        option_layout3 = self.create_option_layout(
+            "Feedback Visual", 
+            "Mostra dicas visuais e animações para jogadores com deficiência auditiva",
+            self.visual_feedback_switch_factory
         )
-        content_layout.add_widget(option_layout_sound_effects)
-        
-        # Music with explanation
-        option_layout_music = self.create_option_layout(
-            "Música", 
-            "Ativa ou desativa a música de fundo do jogo",
-            self.music_switch_factory
-        )
-        content_layout.add_widget(option_layout_music)
+        content_layout.add_widget(option_layout3)
         
         scroll_view.add_widget(content_layout)
         main_layout.add_widget(scroll_view)
@@ -137,25 +125,20 @@ class OptionsScreen(Screen):
         
         return option_box
     
-    def fullscreen_switch_factory(self):
-        self.fullscreen_switch = Switch(active=Window.fullscreen in (True, 'auto'))
-        self.fullscreen_switch.bind(active=self.on_fullscreen_toggle)
-        return self.fullscreen_switch
+    def colorblind_switch_factory(self):
+        self.colorblind_switch = Switch(active=False)
+        self.colorblind_switch.bind(active=self.on_colorblind_toggle)
+        return self.colorblind_switch
     
-    def text_size_slider_factory(self):
-        self.text_size_slider = Slider(min=0.5, max=1.5, value=1.0, step=0.1)
-        self.text_size_slider.bind(value=self.on_text_size_change)
-        return self.text_size_slider
+    def audio_assist_switch_factory(self):
+        self.audio_assist_switch = Switch(active=False)
+        self.audio_assist_switch.bind(active=self.on_audio_assist_toggle)
+        return self.audio_assist_switch
     
-    def sound_effects_switch_factory(self):
-        self.sound_effects_switch = Switch(active=True)
-        self.sound_effects_switch.bind(active=self.on_sound_effects_toggle)
-        return self.sound_effects_switch
-    
-    def music_switch_factory(self):
-        self.music_switch = Switch(active=True)
-        self.music_switch.bind(active=self.on_music_toggle)
-        return self.music_switch
+    def visual_feedback_switch_factory(self):
+        self.visual_feedback_switch = Switch(active=True)
+        self.visual_feedback_switch.bind(active=self.on_visual_feedback_toggle)
+        return self.visual_feedback_switch
     
     def get_font_size(self, base_size):
         # Scale font size based on any app-level settings
@@ -172,23 +155,18 @@ class OptionsScreen(Screen):
         # Load settings from a global app state or file
         app = App.get_running_app()
         if hasattr(app, 'settings'):
-            self.fullscreen_switch.active = app.settings.get('fullscreen', Window.fullscreen)
-            self.text_size_slider.value = app.settings.get('text_size_factor', 1.0)
-            self.sound_effects_switch.active = app.settings.get('sound_effects', True)
-            self.music_switch.active = app.settings.get('music', True)
+            self.colorblind_switch.active = app.settings.get('colorblind_mode', False)
+            self.audio_assist_switch.active = app.settings.get('audio_assist', False)
+            self.visual_feedback_switch.active = app.settings.get('visual_feedback', True)
     
-    def on_fullscreen_toggle(self, instance, value):
-        Window.fullscreen = value
-        print(f"Fullscreen mode: {'on' if value else 'off'}")
+    def on_colorblind_toggle(self, instance, value):
+        print(f"Colorblind mode: {'on' if value else 'off'}")
     
-    def on_text_size_change(self, instance, value):
-        print(f"Text size factor: {value}")
+    def on_audio_assist_toggle(self, instance, value):
+        print(f"Audio assistance: {'on' if value else 'off'}")
     
-    def on_sound_effects_toggle(self, instance, value):
-        print(f"Sound effects: {'on' if value else 'off'}")
-    
-    def on_music_toggle(self, instance, value):
-        print(f"Music: {'on' if value else 'off'}")
+    def on_visual_feedback_toggle(self, instance, value):
+        print(f"Visual feedback: {'on' if value else 'off'}")
     
     def save_options(self, instance):
         # Save all settings to a global app state or file
@@ -196,10 +174,9 @@ class OptionsScreen(Screen):
         if not hasattr(app, 'settings'):
             app.settings = {}
         
-        app.settings['fullscreen'] = self.fullscreen_switch.active
-        app.settings['text_size_factor'] = self.text_size_slider.value
-        app.settings['sound_effects'] = self.sound_effects_switch.active
-        app.settings['music'] = self.music_switch.active
+        app.settings['colorblind_mode'] = self.colorblind_switch.active
+        app.settings['audio_assist'] = self.audio_assist_switch.active
+        app.settings['visual_feedback'] = self.visual_feedback_switch.active
         
         print("Settings saved!")
         self.go_back(instance)
