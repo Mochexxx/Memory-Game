@@ -10,7 +10,7 @@ from kivy.animation import Animation
 from kivy.uix.image import Image
 import os
 import math
-from logic.game_logic import start_game, check_win_condition
+from logic.game_logic import start_game, check_win_condition  # Fix the import
 
 class GameScreen(Screen):
     def __init__(self, **kwargs):
@@ -67,6 +67,26 @@ class GameScreen(Screen):
         
         self.multiplier = 1  # Initialize score multiplier
         self.consecutive_matches = 0  # Track consecutive matches
+
+        # Easy mode reveal button
+        self.easy_mode_used = False
+        self.reveal_button = Button(
+            text="Revelar Cartas",
+            size_hint=(0.3, 0.05),  # Make the button smaller
+            background_color=(0.5, 0.5, 0.5, 1)
+        )
+        self.reveal_button.bind(on_release=self.reveal_cards)
+        self.reveal_button.opacity = 0  # Initially invisible
+        main_layout.add_widget(self.reveal_button)
+
+        # Back button
+        self.back_button = Button(
+            text="Voltar",
+            size_hint=(0.3, 0.05),  # Make the button smaller
+            background_color=(0.5, 0, 0, 1)
+        )
+        self.back_button.bind(on_release=self.go_back)
+        main_layout.add_widget(self.back_button)
     
     def calculate_optimal_grid(self, num_cards):
         """Calculate the optimal number of columns and card size based on screen dimensions"""
@@ -220,6 +240,16 @@ class GameScreen(Screen):
         if self.audio_mode:
             # Initialize audio assistance
             print("Audio assistance enabled")
+
+        # Enable or disable the reveal button based on easy mode setting
+        app = App.get_running_app()
+        self.easy_mode_used = False
+        if app.settings.get('easy_mode', False):
+            self.reveal_button.opacity = 1
+            self.reveal_button.disabled = False
+        else:
+            self.reveal_button.opacity = 0
+            self.reveal_button.disabled = True
     
     def flip_card(self, instance, card):
         # Prevent flipping cards while checking a match or if card is already flipped/matched
@@ -288,3 +318,29 @@ class GameScreen(Screen):
     def on_leave(self):
         # Stop the timer when leaving the game screen
         self.stop_timer()
+
+    def reveal_cards(self, instance):
+        if self.easy_mode_used:
+            return
+        
+        self.easy_mode_used = True
+        self.reveal_button.disabled = True
+        
+        # Reveal all cards
+        for card, widget in zip(self.cards, self.layout.children):
+            card["flipped"] = True
+            widget.background_normal = card["image"]
+            widget.background_down = card["image"]
+        
+        # Schedule to hide cards after 2 seconds
+        Clock.schedule_once(self.hide_cards, 2)
+    
+    def hide_cards(self, dt):
+        for card, widget in zip(self.cards, self.layout.children):
+            if not card["matched"]:
+                card["flipped"] = False
+                widget.background_normal = 'back.png'
+                widget.background_down = 'back.png'
+    
+    def go_back(self, instance):
+        self.manager.current = 'main_menu'

@@ -54,6 +54,14 @@ class AdaptationsScreen(Screen):
         )
         content_layout.add_widget(option_layout3)
         
+        # Easy mode with explanation
+        option_layout_easy_mode = self.create_option_layout(
+            "Modo Fácil", 
+            "Permite revelar todas as cartas uma vez por jogo",
+            self.easy_mode_switch_factory
+        )
+        content_layout.add_widget(option_layout_easy_mode)
+        
         scroll_view.add_widget(content_layout)
         main_layout.add_widget(scroll_view)
         
@@ -140,6 +148,11 @@ class AdaptationsScreen(Screen):
         self.visual_feedback_switch.bind(active=self.on_visual_feedback_toggle)
         return self.visual_feedback_switch
     
+    def easy_mode_switch_factory(self):
+        self.easy_mode_switch = Switch(active=False)
+        self.easy_mode_switch.bind(active=self.on_easy_mode_toggle)
+        return self.easy_mode_switch
+    
     def get_font_size(self, base_size):
         # Scale font size based on any app-level settings
         app = App.get_running_app()
@@ -158,6 +171,7 @@ class AdaptationsScreen(Screen):
             self.colorblind_switch.active = app.settings.get('colorblind_mode', False)
             self.audio_assist_switch.active = app.settings.get('audio_assist', False)
             self.visual_feedback_switch.active = app.settings.get('visual_feedback', True)
+            self.easy_mode_switch.active = app.settings.get('easy_mode', False)
     
     def on_colorblind_toggle(self, instance, value):
         print(f"Colorblind mode: {'on' if value else 'off'}")
@@ -168,6 +182,9 @@ class AdaptationsScreen(Screen):
     def on_visual_feedback_toggle(self, instance, value):
         print(f"Visual feedback: {'on' if value else 'off'}")
     
+    def on_easy_mode_toggle(self, instance, value):
+        print(f"Easy mode: {'on' if value else 'off'}")
+    
     def save_options(self, instance):
         # Save all settings to a global app state or file
         app = App.get_running_app()
@@ -177,6 +194,7 @@ class AdaptationsScreen(Screen):
         app.settings['colorblind_mode'] = self.colorblind_switch.active
         app.settings['audio_assist'] = self.audio_assist_switch.active
         app.settings['visual_feedback'] = self.visual_feedback_switch.active
+        app.settings['easy_mode'] = self.easy_mode_switch.active
         
         print("Settings saved!")
         self.go_back(instance)
