@@ -66,6 +66,14 @@ class OptionsScreen(Screen):
         )
         content_layout.add_widget(option_layout_music)
         
+        # Casual Mode - replaces separate score and timer options
+        option_layout_casual_mode = self.create_option_layout(
+            "Modo Casual", 
+            "Quando ativado, desativa a pontuação e o temporizador para uma experiência mais relaxante",
+            self.casual_mode_switch_factory
+        )
+        content_layout.add_widget(option_layout_casual_mode)
+        
         scroll_view.add_widget(content_layout)
         main_layout.add_widget(scroll_view)
         
@@ -157,6 +165,11 @@ class OptionsScreen(Screen):
         self.music_switch.bind(active=self.on_music_toggle)
         return self.music_switch
     
+    def casual_mode_switch_factory(self):
+        self.casual_mode_switch = Switch(active=False)
+        self.casual_mode_switch.bind(active=self.on_casual_mode_toggle)
+        return self.casual_mode_switch
+    
     def get_font_size(self, base_size):
         # Scale font size based on any app-level settings
         app = App.get_running_app()
@@ -176,6 +189,11 @@ class OptionsScreen(Screen):
             self.text_size_slider.value = app.settings.get('text_size_factor', 1.0)
             self.sound_effects_switch.active = app.settings.get('sound_effects', True)
             self.music_switch.active = app.settings.get('music', True)
+            
+            # Set casual mode based on whether both score and timer displays are disabled
+            score_display = app.settings.get('score_display', True)
+            timer_display = app.settings.get('timer_display', True)
+            self.casual_mode_switch.active = not (score_display or timer_display)
     
     def on_fullscreen_toggle(self, instance, value):
         Window.fullscreen = value
@@ -190,6 +208,9 @@ class OptionsScreen(Screen):
     def on_music_toggle(self, instance, value):
         print(f"Music: {'on' if value else 'off'}")
     
+    def on_casual_mode_toggle(self, instance, value):
+        print(f"Casual mode: {'on' if value else 'off'}")
+    
     def save_options(self, instance):
         # Save all settings to a global app state or file
         app = App.get_running_app()
@@ -200,6 +221,11 @@ class OptionsScreen(Screen):
         app.settings['text_size_factor'] = self.text_size_slider.value
         app.settings['sound_effects'] = self.sound_effects_switch.active
         app.settings['music'] = self.music_switch.active
+        
+        # Set both score_display and timer_display based on the inverse of casual mode
+        # (casual mode means hiding both score and timer)
+        app.settings['score_display'] = not self.casual_mode_switch.active
+        app.settings['timer_display'] = not self.casual_mode_switch.active
         
         print("Settings saved!")
         self.go_back(instance)

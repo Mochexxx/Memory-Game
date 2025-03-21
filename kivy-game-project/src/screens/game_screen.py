@@ -20,7 +20,7 @@ class GameScreen(Screen):
         main_layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
         
         # Create a HUD for score and timer
-        hud_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        self.hud_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
         
         # Score label
         self.score = 0
@@ -31,15 +31,14 @@ class GameScreen(Screen):
         self.timer_label = Label(text="Tempo: 0s", font_size=24)
         self.timer_event = None
         
-        # Add labels to HUD
-        hud_layout.add_widget(self.score_label)
-        hud_layout.add_widget(self.timer_label)
+        # Get initial accessibility settings from the app
+        self.update_settings()
         
         # Create grid layout for cards - we'll adjust columns later
         self.layout = GridLayout(spacing=10, padding=20)
         
         # Add both layouts to the main layout
-        main_layout.add_widget(hud_layout)
+        main_layout.add_widget(self.hud_layout)
         main_layout.add_widget(self.layout)
         
         self.add_widget(main_layout)
@@ -51,17 +50,6 @@ class GameScreen(Screen):
         # Track current theme and difficulty for replay
         self.current_theme = None
         self.current_difficulty = None
-
-        # Get accessibility settings from the app
-        app = App.get_running_app()
-        if hasattr(app, 'settings'):
-            self.accessibility_mode = app.settings.get('visual_feedback', True)
-            self.colorblind_mode = app.settings.get('colorblind_mode', False)
-            self.audio_mode = app.settings.get('audio_assist', False)
-        else:
-            self.accessibility_mode = True
-            self.colorblind_mode = False
-            self.audio_mode = False
             
         # Bind to window resize event
         Window.bind(on_resize=self.on_window_resize)
@@ -90,6 +78,38 @@ class GameScreen(Screen):
         main_layout.add_widget(self.back_button)
 
         self.sounds = {}  # Dictionary to store sounds for each card
+    
+    def update_settings(self):
+        """Update display settings based on app settings"""
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            self.accessibility_mode = app.settings.get('visual_feedback', True)
+            self.colorblind_mode = app.settings.get('colorblind_mode', False)
+            self.audio_mode = app.settings.get('audio_assist', False)
+            self.score_display = app.settings.get('score_display', True)
+            self.timer_display = app.settings.get('timer_display', True)
+        else:
+            self.accessibility_mode = True
+            self.colorblind_mode = False
+            self.audio_mode = False
+            self.score_display = True
+            self.timer_display = True
+        
+        # Update HUD based on settings
+        self.update_hud()
+    
+    def update_hud(self):
+        """Update the HUD layout based on current settings"""
+        self.hud_layout.clear_widgets()
+        if self.score_display:
+            self.hud_layout.add_widget(self.score_label)
+        if self.timer_display:
+            self.hud_layout.add_widget(self.timer_label)
+    
+    def on_enter(self):
+        """Called when the screen is entered"""
+        # Update settings when entering the screen
+        self.update_settings()
     
     def calculate_optimal_grid(self, num_cards):
         """Calculate the optimal number of columns and card size based on screen dimensions"""
@@ -189,6 +209,8 @@ class GameScreen(Screen):
             widget.size = (card_width, card_height)
     
     def start_timer(self):
+        if not self.timer_display:
+            return
         # Reset and start the timer
         self.elapsed_time = 0
         self.timer_label.text = "Tempo: 0s"
@@ -196,10 +218,14 @@ class GameScreen(Screen):
         self.timer_event = Clock.schedule_interval(self.update_timer, 1)
     
     def update_timer(self, dt):
+        if not self.timer_display:
+            return
         self.elapsed_time += 1
         self.timer_label.text = f"Tempo: {self.elapsed_time}s"
     
     def stop_timer(self):
+        if not self.timer_display:
+            return
         # Stop the timer if it's running
         if self.timer_event:
             self.timer_event.cancel()
@@ -217,15 +243,27 @@ class GameScreen(Screen):
         optimal_cols, card_width, card_height = self.calculate_optimal_grid(len(self.cards))
         self.layout.cols = optimal_cols
         
-        for card in self.cards:
+        # Clear selected cards when starting a new game
+        self.selected_cards = []
+        
+        # Create a card button factory function to avoid lambda issues
+        def create_card_button(card_data):
             btn = Button(
                 size_hint=(None, None),
                 size=(card_width, card_height),
                 background_normal='back.png',
                 background_down='back.png'
             )
-            btn.bind(on_release=lambda instance, c=card: self.flip_card(instance, c))
-            self.layout.add_widget(btn)
+            
+            def on_card_press(instance):
+                self.flip_card(instance, card_data)
+            
+            btn.bind(on_release=on_card_press)
+            return btn
+        
+        # Add buttons for each card using the factory function
+        for card in self.cards:
+            self.layout.add_widget(create_card_button(card))
         
         # Load sounds for each card from the specified folder
         sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
@@ -240,7 +278,8 @@ class GameScreen(Screen):
         
         # Reset score and start timer for new game
         self.score = 0
-        self.score_label.text = "Score: 0"
+        if self.score_display:
+            self.score_label.text = "Score: 0"
         self.stop_timer()  # Make sure to stop any existing timer
         self.start_timer()  # Start a new timer
 
@@ -269,11 +308,15 @@ class GameScreen(Screen):
         # Prevent flipping cards while checking a match or if card is already flipped/matched
         if self.is_checking or card["flipped"] or card["matched"]:
             return
+        
+        print(f"Flipping card: {card['image']}")  # Debug print
             
         card["flipped"] = True
         instance.background_normal = card["image"]
         instance.background_down = card["image"]
         self.selected_cards.append((instance, card))
+        
+        print(f"Selected cards count: {len(self.selected_cards)}")  # Debug print
         
         # Play the sound associated with the card if audio assistance is enabled
         app = App.get_running_app()
@@ -291,8 +334,11 @@ class GameScreen(Screen):
     def check_match(self, dt):
         # Make sure we have exactly 2 cards to check
         if len(self.selected_cards) != 2:
+            print(f"Warning: check_match called with {len(self.selected_cards)} cards")  # Debug print
             self.is_checking = False
             return
+        
+        print(f"Checking match between: {self.selected_cards[0][1]['image']} and {self.selected_cards[1][1]['image']}")  # Debug print
             
         if self.selected_cards[0][1]["image"] == self.selected_cards[1][1]["image"]:
             self.selected_cards[0][1]["matched"] = True
@@ -300,7 +346,19 @@ class GameScreen(Screen):
             self.consecutive_matches += 1
             self.multiplier = min(self.consecutive_matches, 5)  # Cap multiplier at 5
             self.score += 1 * self.multiplier
-            self.score_label.text = f"Score: {self.score}"
+            if self.score_display:
+                self.score_label.text = f"Score: {self.score}"
+            
+            # Count number of matched pairs
+            matched_count = sum(1 for card in self.cards if card["matched"]) // 2  # Divide by 2 to get pairs
+            total_pairs = len(self.cards) // 2
+            remaining_pairs = total_pairs - matched_count
+            
+            # Only show match screen if more than 2 pairs are left to match
+            if remaining_pairs > 2:
+                # Show match screen
+                match_screen = self.manager.get_screen('match_screen')
+                match_screen.show_match()
         else:
             self.consecutive_matches = 0
             self.multiplier = 1
@@ -308,7 +366,8 @@ class GameScreen(Screen):
                 self.lives -= 1
             else:
                 self.score = max(self.score - 1, 0)  # Ensure score does not go below zero
-                self.score_label.text = f"Score: {self.score}"
+                if self.score_display:
+                    self.score_label.text = f"Score: {self.score}"
             self.selected_cards[0][1]["flipped"] = False
             self.selected_cards[1][1]["flipped"] = False
             self.selected_cards[0][0].background_normal = 'back.png'
@@ -329,13 +388,34 @@ class GameScreen(Screen):
         if check_win_condition(self.cards):
             print("Condição de vitória encontrada! A parar o relógio e a dar display da victory screen.")
             self.stop_timer()
-            # Use Clock.schedule_once to ensure the transition happens in the next frame
-            Clock.schedule_once(lambda dt: self.show_win_screen(), 0.5)
-    
+            # Remove delay to prevent any race conditions
+            self.show_win_screen()
+
     def show_win_screen(self):
+        print("Showing win screen")  # Debug print
+        
         # Pass the elapsed time, theme, and difficulty to the win screen
         win_screen = self.manager.get_screen('win_screen')
+        
+        # Make sure we have the latest settings
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            self.score_display = app.settings.get('score_display', True)
+            self.timer_display = app.settings.get('timer_display', True)
+        
+        print(f"Settings: show score={self.score_display}, show timer={self.timer_display}")  # Debug print
+        
+        # Set game stats first
         win_screen.set_game_stats(self.elapsed_time, self.current_theme, self.current_difficulty)
+        
+        # Display score and time based on settings
+        if self.score_display:
+            win_screen.display_score(self.score)
+        
+        # Important: Ensure all changes to the win screen are done before switching to it
+        win_screen.update_labels_visibility()
+        
+        # Switch to win screen directly
         self.manager.current = 'win_screen'
     
     def on_leave(self):

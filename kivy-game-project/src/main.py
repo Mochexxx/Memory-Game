@@ -16,6 +16,7 @@ from screens.information_screens import (
 )
 from screens.rules_submenu import RulesSubmenu
 from screens.adaptations_screen import AdaptationsScreen  # Add this import
+from screens.match_screen import MatchScreen  # Ensure this import is present
 
 class MyScreenManager(ScreenManager):
     pass
@@ -44,6 +45,7 @@ class MemoryGameApp(App):
         sm.add_widget(GameStructureScreen(name='game_structure_screen'))
         sm.add_widget(WinScreen(name='win_screen'))
         sm.add_widget(RulesSubmenu(name='rules_submenu'))
+        sm.add_widget(MatchScreen(name='match_screen'))  # Ensure this line is present
         return sm
 
 if __name__ == '__main__':
