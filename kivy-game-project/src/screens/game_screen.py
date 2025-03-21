@@ -275,12 +275,14 @@ class GameScreen(Screen):
         instance.background_down = card["image"]
         self.selected_cards.append((instance, card))
         
-        # Play the sound associated with the card
-        if card["image"] in self.sounds and self.sounds[card["image"]]:
-            print(f"Playing sound for {card['image']}")  # Debug print
-            self.sounds[card["image"]].play()
-        else:
-            print(f"No sound loaded for {card['image']}")  # Debug print
+        # Play the sound associated with the card if audio assistance is enabled
+        app = App.get_running_app()
+        if app.settings.get('audio_assist', False):
+            if card["image"] in self.sounds and self.sounds[card["image"]]:
+                print(f"Playing sound for {card['image']}")  # Debug print
+                self.sounds[card["image"]].play()
+            else:
+                print(f"No sound loaded for {card['image']}")  # Debug print
         
         if len(self.selected_cards) == 2:
             self.is_checking = True  # Set flag to prevent more cards being flipped
