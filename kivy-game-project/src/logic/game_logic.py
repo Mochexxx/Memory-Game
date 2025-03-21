@@ -37,7 +37,9 @@ def generate_cards(theme, num_cards):
     random.shuffle(images)
     
     cards = []
+    sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
     for img_path in images:
-        cards.append({"image": img_path, "flipped": False, "matched": False})
+        sound_path = os.path.join(sound_folder, os.path.basename(img_path).replace(".png", ".wav"))
+        cards.append({"image": img_path, "flipped": False, "matched": False, "sound": sound_path if os.path.exists(sound_path) else None})
     
     return cards

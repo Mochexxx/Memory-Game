@@ -8,6 +8,7 @@ from kivy.app import App
 from kivy.core.window import Window
 from kivy.animation import Animation
 from kivy.uix.image import Image
+from kivy.core.audio import SoundLoader
 import os
 import math
 from logic.game_logic import start_game, check_win_condition  # Fix the import
@@ -87,6 +88,8 @@ class GameScreen(Screen):
         )
         self.back_button.bind(on_release=self.go_back)
         main_layout.add_widget(self.back_button)
+
+        self.sounds = {}  # Dictionary to store sounds for each card
     
     def calculate_optimal_grid(self, num_cards):
         """Calculate the optimal number of columns and card size based on screen dimensions"""
@@ -224,6 +227,17 @@ class GameScreen(Screen):
             btn.bind(on_release=lambda instance, c=card: self.flip_card(instance, c))
             self.layout.add_widget(btn)
         
+        # Load sounds for each card from the specified folder
+        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+        for card in self.cards:
+            sound_path = os.path.join(sound_folder, os.path.basename(card["image"]).replace(".png", ".wav"))
+            print(f"Loading sound for {card['image']}: {sound_path}")  # Debug print
+            if os.path.exists(sound_path):
+                self.sounds[card["image"]] = SoundLoader.load(sound_path)
+                print(f"Loaded sound for {card['image']}")  # Debug print
+            else:
+                print(f"Sound file not found for {card['image']}")  # Debug print
+        
         # Reset score and start timer for new game
         self.score = 0
         self.score_label.text = "Score: 0"
@@ -260,6 +274,13 @@ class GameScreen(Screen):
         instance.background_normal = card["image"]
         instance.background_down = card["image"]
         self.selected_cards.append((instance, card))
+        
+        # Play the sound associated with the card
+        if card["image"] in self.sounds and self.sounds[card["image"]]:
+            print(f"Playing sound for {card['image']}")  # Debug print
+            self.sounds[card["image"]].play()
+        else:
+            print(f"No sound loaded for {card['image']}")  # Debug print
         
         if len(self.selected_cards) == 2:
             self.is_checking = True  # Set flag to prevent more cards being flipped
