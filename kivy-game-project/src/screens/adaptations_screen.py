@@ -6,6 +6,7 @@ from kivy.uix.label import Label
 from kivy.uix.switch import Switch
 from kivy.app import App
 from kivy.metrics import dp
+from utils.settings_manager import save_settings
 
 class AdaptationsScreen(Screen):
     def __init__(self, **kwargs):
@@ -174,15 +175,31 @@ class AdaptationsScreen(Screen):
             self.easy_mode_switch.active = app.settings.get('easy_mode', False)
     
     def on_colorblind_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['colorblind_mode'] = value
+            save_settings(app.settings)
         print(f"Colorblind mode: {'on' if value else 'off'}")
     
     def on_audio_assist_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['audio_assist'] = value
+            save_settings(app.settings)
         print(f"Audio assistance: {'on' if value else 'off'}")
     
     def on_visual_feedback_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['visual_feedback'] = value
+            save_settings(app.settings)
         print(f"Visual feedback: {'on' if value else 'off'}")
     
     def on_easy_mode_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['easy_mode'] = value
+            save_settings(app.settings)
         print(f"Easy mode: {'on' if value else 'off'}")
     
     def save_options(self, instance):
@@ -195,6 +212,9 @@ class AdaptationsScreen(Screen):
         app.settings['audio_assist'] = self.audio_assist_switch.active
         app.settings['visual_feedback'] = self.visual_feedback_switch.active
         app.settings['easy_mode'] = self.easy_mode_switch.active
+        
+        # Save settings to file
+        save_settings(app.settings)
         
         print("Settings saved!")
         self.go_back(instance)

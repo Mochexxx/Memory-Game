@@ -9,6 +9,7 @@ from kivy.uix.slider import Slider
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.core.window import Window
+from utils.settings_manager import save_settings
 
 class OptionsScreen(Screen):
     def __init__(self, **kwargs):
@@ -65,6 +66,15 @@ class OptionsScreen(Screen):
             self.music_switch_factory
         )
         content_layout.add_widget(option_layout_music)
+        
+        # Music volume with explanation
+        option_layout_music_volume = self.create_option_layout(
+            "Volume da Música", 
+            "Controla o volume da música de fundo",
+            self.music_volume_slider_factory,
+            is_slider=True
+        )
+        content_layout.add_widget(option_layout_music_volume)
         
         # Casual Mode - replaces separate score and timer options
         option_layout_casual_mode = self.create_option_layout(
@@ -165,6 +175,12 @@ class OptionsScreen(Screen):
         self.music_switch.bind(active=self.on_music_toggle)
         return self.music_switch
     
+    def music_volume_slider_factory(self):
+        """Create the music volume slider"""
+        self.music_volume_slider = Slider(min=0.0, max=1.0, value=0.5, step=0.1)
+        self.music_volume_slider.bind(value=self.on_music_volume_change)
+        return self.music_volume_slider
+    
     def casual_mode_switch_factory(self):
         self.casual_mode_switch = Switch(active=False)
         self.casual_mode_switch.bind(active=self.on_casual_mode_toggle)
@@ -189,6 +205,7 @@ class OptionsScreen(Screen):
             self.text_size_slider.value = app.settings.get('text_size_factor', 1.0)
             self.sound_effects_switch.active = app.settings.get('sound_effects', True)
             self.music_switch.active = app.settings.get('music', True)
+            self.music_volume_slider.value = app.settings.get('music_volume', 0.5)
             
             # Set casual mode based on whether both score and timer displays are disabled
             score_display = app.settings.get('score_display', True)
@@ -197,18 +214,56 @@ class OptionsScreen(Screen):
     
     def on_fullscreen_toggle(self, instance, value):
         Window.fullscreen = value
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['fullscreen'] = value
+            save_settings(app.settings)
         print(f"Fullscreen mode: {'on' if value else 'off'}")
     
     def on_text_size_change(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['text_size_factor'] = value
+            save_settings(app.settings)
         print(f"Text size factor: {value}")
     
     def on_sound_effects_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['sound_effects'] = value
+            save_settings(app.settings)
         print(f"Sound effects: {'on' if value else 'off'}")
     
     def on_music_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['music'] = value
+            save_settings(app.settings)
+            
+            # Update music manager state
+            if hasattr(app, 'music_manager'):
+                app.music_manager.set_enabled(value)
+                
         print(f"Music: {'on' if value else 'off'}")
     
+    def on_music_volume_change(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['music_volume'] = value
+            save_settings(app.settings)
+            
+            # Update music manager volume
+            if hasattr(app, 'music_manager'):
+                app.music_manager.set_volume(value)
+                
+        print(f"Music volume: {value}")
+    
     def on_casual_mode_toggle(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['score_display'] = not value
+            app.settings['timer_display'] = not value
+            save_settings(app.settings)
         print(f"Casual mode: {'on' if value else 'off'}")
     
     def save_options(self, instance):
@@ -221,11 +276,19 @@ class OptionsScreen(Screen):
         app.settings['text_size_factor'] = self.text_size_slider.value
         app.settings['sound_effects'] = self.sound_effects_switch.active
         app.settings['music'] = self.music_switch.active
+        app.settings['music_volume'] = self.music_volume_slider.value
         
         # Set both score_display and timer_display based on the inverse of casual mode
-        # (casual mode means hiding both score and timer)
         app.settings['score_display'] = not self.casual_mode_switch.active
         app.settings['timer_display'] = not self.casual_mode_switch.active
+        
+        # Apply music settings immediately
+        if hasattr(app, 'music_manager'):
+            app.music_manager.set_enabled(app.settings['music'])
+            app.music_manager.set_volume(app.settings['music_volume'])
+        
+        # Save to file
+        save_settings(app.settings)
         
         print("Settings saved!")
         self.go_back(instance)
