@@ -20,7 +20,11 @@ class DifficultySelectionScreen(Screen):
         
         for text, callback, num_cards in difficulties:
             btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
-            btn.bind(on_release=lambda instance, cb=callback, nc=num_cards: cb(instance, nc))
+            # Special handling for "Voltar" button to avoid passing the extra parameter
+            if text == "Voltar":
+                btn.bind(on_release=self.go_back)
+            else:
+                btn.bind(on_release=lambda instance, cb=callback, nc=num_cards: cb(instance, nc))
             layout.add_widget(btn)
         
         self.add_widget(layout)
