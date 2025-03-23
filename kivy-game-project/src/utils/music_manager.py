@@ -112,14 +112,25 @@ class MusicManager:
     
     def set_enabled(self, enabled):
         """Enable or disable music"""
-        self.enabled = enabled
-        if enabled:
-            self.play_random()
+        # Only make changes if the enabled state is changing
+        if self.enabled != enabled:
+            print(f"Music enabled state changing: {self.enabled} -> {enabled}")
+            self.enabled = enabled
+            
+            if enabled:
+                # Start playing since we're turning music on
+                print("Starting music playback")
+                self.play_random()
+            else:
+                # Stop playing since we're turning music off
+                print("Stopping music playback")
+                self.stop()
         else:
-            self.stop()
+            print(f"Music enabled state unchanged: {enabled}")
     
     def set_volume(self, volume):
         """Set music volume (0.0 to 1.0)"""
         self.volume = max(0, min(1, volume))
         if self.current_music:
+            print(f"Updating music volume to {self.volume}")
             self.current_music.volume = self.volume

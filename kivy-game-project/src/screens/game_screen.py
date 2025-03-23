@@ -12,6 +12,7 @@ from kivy.core.audio import SoundLoader
 import os
 import math
 from logic.game_logic import start_game, check_win_condition  # Fix the import
+from utils.stats_manager import update_stats
 
 class GameScreen(Screen):
     def __init__(self, **kwargs):
@@ -393,6 +394,16 @@ class GameScreen(Screen):
 
     def show_win_screen(self):
         print("Showing win screen")  # Debug print
+        
+        # Save game statistics
+        game_data = {
+            'score': self.score,
+            'time': self.elapsed_time,
+            'theme': self.current_theme,
+            'difficulty': self.current_difficulty,
+            'pairs_matched': len(self.cards) // 2
+        }
+        update_stats(game_data)
         
         # Pass the elapsed time, theme, and difficulty to the win screen
         win_screen = self.manager.get_screen('win_screen')

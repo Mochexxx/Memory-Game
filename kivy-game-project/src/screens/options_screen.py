@@ -272,6 +272,10 @@ class OptionsScreen(Screen):
         if not hasattr(app, 'settings'):
             app.settings = {}
         
+        # Save previous music settings to detect changes
+        previous_music_enabled = app.settings.get('music', True)
+        previous_music_volume = app.settings.get('music_volume', 0.5)
+        
         app.settings['fullscreen'] = self.fullscreen_switch.active
         app.settings['text_size_factor'] = self.text_size_slider.value
         app.settings['sound_effects'] = self.sound_effects_switch.active
@@ -282,9 +286,13 @@ class OptionsScreen(Screen):
         app.settings['score_display'] = not self.casual_mode_switch.active
         app.settings['timer_display'] = not self.casual_mode_switch.active
         
-        # Apply music settings immediately
+        # Apply music settings only if they've changed
         if hasattr(app, 'music_manager'):
-            app.music_manager.set_enabled(app.settings['music'])
+            # Only update the enabled state if it changed
+            if previous_music_enabled != app.settings['music']:
+                app.music_manager.set_enabled(app.settings['music'])
+            
+            # Always update volume as it's a smooth adjustment
             app.music_manager.set_volume(app.settings['music_volume'])
         
         # Save to file

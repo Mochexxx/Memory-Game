@@ -2,15 +2,28 @@ from kivy.app import App
 from kivy.uix.screenmanager import Screen
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
+from widgets.stats_display import StatsDisplay
 
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
+        
+        # Use a FloatLayout as the main container to allow absolute positioning
+        main_layout = FloatLayout()
+        
+        # Menu buttons in a vertical layout
+        menu_layout = BoxLayout(
+            orientation='vertical', 
+            spacing=20, 
+            padding=50,
+            size_hint=(0.5, 0.7),  # Reduced width to ensure no overlap
+            pos_hint={'x': 0.05, 'center_y': 0.5}
+        )
         
         title = Label(text="Jogo de Memória", font_size=74, size_hint=(1, 0.2))
-        layout.add_widget(title)
+        menu_layout.add_widget(title)
         
         buttons = [
             ("Iniciar Jogo", self.start_game),
@@ -23,9 +36,25 @@ class MainMenu(Screen):
         for text, callback in buttons:
             btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
             btn.bind(on_release=callback)
-            layout.add_widget(btn)
+            menu_layout.add_widget(btn)
         
-        self.add_widget(layout)
+        main_layout.add_widget(menu_layout)
+        
+        # Create stats panel with appropriate size and position
+        self.stats_display = StatsDisplay(
+            size_hint=(0.3, None),  # Fixed width but auto height
+            pos_hint={'right': 0.95, 'top': 0.85}  # Position at top right
+        )
+        main_layout.add_widget(self.stats_display)
+        
+        self.add_widget(main_layout)
+    
+    def on_enter(self):
+        """Called when the screen is entered"""
+        # Always update statistics when returning to the main menu
+        if hasattr(self, 'stats_display'):
+            print("Updating stats display")
+            self.stats_display.update_stats()
     
     def start_game(self, instance):
         self.manager.current = 'theme_selection'
