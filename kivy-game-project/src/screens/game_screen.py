@@ -266,10 +266,27 @@ class GameScreen(Screen):
         for card in self.cards:
             self.layout.add_widget(create_card_button(card))
         
+        # Determine the appropriate sound folder based on the theme
+        sound_folder = None
+        if "baralho_animais" in theme.lower():
+            sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+        elif "baralho_numeros" in theme.lower():
+            sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_numeros_wav"
+        else:
+            # Fallback to the default folder
+            sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+        
+        print(f"Selected sound folder for theme '{theme}': {sound_folder}")
+        
         # Load sounds for each card from the specified folder
-        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
         for card in self.cards:
-            sound_path = os.path.join(sound_folder, os.path.basename(card["image"]).replace(".png", ".wav"))
+            # Get the base filename without extension
+            base_filename = os.path.basename(card["image"])
+            
+            # The numbers theme uses 0-indexed filenames (0.png = number 1, 31.png = number 32)
+            # and the audio files follow the same convention (0.wav = spoken "one", etc.)
+            sound_path = os.path.join(sound_folder, base_filename.replace(".png", ".wav"))
+            
             print(f"Loading sound for {card['image']}: {sound_path}")  # Debug print
             if os.path.exists(sound_path):
                 self.sounds[card["image"]] = SoundLoader.load(sound_path)

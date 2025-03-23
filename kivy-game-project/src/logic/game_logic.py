@@ -37,9 +37,29 @@ def generate_cards(theme, num_cards):
     random.shuffle(images)
     
     cards = []
-    sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+    
+    # Determine the appropriate sound folder based on the theme
+    sound_folder = None
+    if "baralho_animais" in theme.lower():
+        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+    elif "baralho_numeros" in theme.lower():
+        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_numeros_wav"
+    else:
+        # Fallback to the default folder
+        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+    
     for img_path in images:
-        sound_path = os.path.join(sound_folder, os.path.basename(img_path).replace(".png", ".wav"))
-        cards.append({"image": img_path, "flipped": False, "matched": False, "sound": sound_path if os.path.exists(sound_path) else None})
+        base_filename = os.path.basename(img_path)
+        
+        # For number theme, cards use 0-indexed filenames (0.png = number 1, 31.png = number 32)
+        # Audio files follow the same naming convention (0.wav = spoken "one", etc.)
+        sound_path = os.path.join(sound_folder, base_filename.replace(".png", ".wav"))
+        
+        cards.append({
+            "image": img_path, 
+            "flipped": False, 
+            "matched": False, 
+            "sound": sound_path if os.path.exists(sound_path) else None
+        })
     
     return cards
