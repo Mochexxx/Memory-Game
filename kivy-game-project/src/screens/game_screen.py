@@ -335,13 +335,14 @@ class GameScreen(Screen):
     def check_match(self, dt):
         # Make sure we have exactly 2 cards to check
         if len(self.selected_cards) != 2:
-            print(f"Warning: check_match called with {len(self.selected_cards)} cards")  # Debug print
+            print(f"Warning: check_match called with {len(self.selected_cards)} cards")
             self.is_checking = False
             return
         
-        print(f"Checking match between: {self.selected_cards[0][1]['image']} and {self.selected_cards[1][1]['image']}")  # Debug print
+        print(f"Checking match between: {self.selected_cards[0][1]['image']} and {self.selected_cards[1][1]['image']}")
             
         if self.selected_cards[0][1]["image"] == self.selected_cards[1][1]["image"]:
+            # This is a match! Mark cards as matched
             self.selected_cards[0][1]["matched"] = True
             self.selected_cards[1][1]["matched"] = True
             self.consecutive_matches += 1
@@ -350,16 +351,18 @@ class GameScreen(Screen):
             if self.score_display:
                 self.score_label.text = f"Score: {self.score}"
             
-            # Count number of matched pairs
-            matched_count = sum(1 for card in self.cards if card["matched"]) // 2  # Divide by 2 to get pairs
+            # Solução simplificada: Apenas verifique se este é o último par
             total_pairs = len(self.cards) // 2
-            remaining_pairs = total_pairs - matched_count
+            matched_pairs = sum(1 for card in self.cards if card["matched"]) // 2
             
-            # Only show match screen if more than 2 pairs are left to match
-            if remaining_pairs > 2:
-                # Show match screen
+            # Se NÃO for o último par (ainda falta pelo menos um par), mostre a tela de match
+            if matched_pairs < total_pairs:
                 match_screen = self.manager.get_screen('match_screen')
                 match_screen.show_match()
+                print(f"✓ Mostrando a tela de match - par {matched_pairs}/{total_pairs}")
+            else:
+                print(f"✗ Último par encontrado - não mostrando a tela de match")
+            
         else:
             self.consecutive_matches = 0
             self.multiplier = 1
@@ -380,10 +383,10 @@ class GameScreen(Screen):
         self.selected_cards = []
         self.is_checking = False
         
-        # Debug info
-        matched_count = sum(1 for card in self.cards if card["matched"])
+        # More accurate debug info
         total_cards = len(self.cards)
-        print(f"Matched cards: {matched_count}/{total_cards}")
+        matched_cards = sum(1 for card in self.cards if card["matched"])
+        print(f"Final state: Matched cards: {matched_cards}/{total_cards}, Remaining: {total_cards - matched_cards}")
         
         # Check win condition and ensure we transition to win screen
         if check_win_condition(self.cards):

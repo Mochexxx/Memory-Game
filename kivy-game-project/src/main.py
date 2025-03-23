@@ -89,8 +89,14 @@ class MemoryGameApp(App):
         # Initialize the music manager
         self.music_manager = MusicManager()
         
-        # Apply window settings
-        Window.fullscreen = self.settings.get('fullscreen', True)
+        # Apply window settings based on fullscreen preference but ensure maximum resolution
+        if self.settings.get('fullscreen', False):
+            # Set to fullscreen mode at maximum resolution
+            Window.fullscreen = 'auto'  # Use 'auto' for best fullscreen mode
+        else:
+            # Set to windowed mode but maximized
+            Window.fullscreen = False
+            Window.maximize()
     
     def on_start(self):
         """Called when the application starts"""
