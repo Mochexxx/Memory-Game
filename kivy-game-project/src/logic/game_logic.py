@@ -1,5 +1,22 @@
 import random
 import os
+from pathlib import Path
+
+def find_project_root():
+    """Find the project root directory by looking for known directories"""
+    # Start with the directory of this file and go up until we find the project root
+    current_dir = Path(__file__).resolve().parent.parent.parent.parent
+    
+    # Check if we're at the project root
+    if (current_dir / "Items_Jogo").exists():
+        return str(current_dir)
+    if (current_dir.parent / "Items_Jogo").exists():
+        return str(current_dir.parent)
+    
+    # Fallback to a hardcoded path but with the correct username from the file path
+    file_path = Path(__file__).resolve()
+    username = file_path.parts[2]  # Extract username from path
+    return os.path.join('C:', os.sep, 'Users', username, 'Documents', 'GitHub', 'IPC_24-25')
 
 def start_game(theme, num_cards):
     # Initialize game state and variables
@@ -38,15 +55,18 @@ def generate_cards(theme, num_cards):
     
     cards = []
     
+    # Get project root directory
+    project_root = find_project_root()
+    
     # Determine the appropriate sound folder based on the theme
     sound_folder = None
     if "baralho_animais" in theme.lower():
-        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+        sound_folder = os.path.join(project_root, "Items_Jogo", "audios_wav_animais")
     elif "baralho_numeros" in theme.lower():
-        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_numeros_wav"
+        sound_folder = os.path.join(project_root, "Items_Jogo", "audios_numeros_wav")
     else:
         # Fallback to the default folder
-        sound_folder = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\audios_wav_animais"
+        sound_folder = os.path.join(project_root, "Items_Jogo", "audios_wav_animais")
     
     for img_path in images:
         base_filename = os.path.basename(img_path)

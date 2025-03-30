@@ -3,10 +3,15 @@ from kivy.uix.screenmanager import ScreenManager
 from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
+from kivy.graphics import Color, Rectangle  # Add missing import
 
 # Import settings manager
 from utils.settings_manager import load_settings, save_settings
 from utils.music_manager import MusicManager
+
+# Import path utilities
+import os
+from pathlib import Path
 
 # Import screens
 from screens.main_menu import MainMenu
@@ -25,6 +30,22 @@ from screens.adaptations_screen import AdaptationsScreen
 from screens.match_screen import MatchScreen
 # Removed elegant menu import
 
+def find_project_root():
+    """Find the project root directory by looking for known directories"""
+    # Start with the directory of this file and go up until we find the project root
+    current_dir = Path(__file__).resolve().parent.parent.parent
+    
+    # Check if we're at the project root
+    if (current_dir / "Items_Jogo").exists():
+        return str(current_dir)
+    if (current_dir.parent / "Items_Jogo").exists():
+        return str(current_dir.parent)
+    
+    # Fallback to a hardcoded path but with the correct username from the file path
+    file_path = Path(__file__).resolve()
+    username = file_path.parts[2]  # Extract username from path
+    return os.path.join('C:', os.sep, 'Users', username, 'Documents', 'GitHub', 'IPC_24-25')
+
 class BackgroundFloatLayout(FloatLayout):
     """A float layout with a background image"""
     def __init__(self, **kwargs):
@@ -32,9 +53,11 @@ class BackgroundFloatLayout(FloatLayout):
         
         # Add background image as the first (bottom) widget
         try:
-            # Check if the file exists first
-            import os
-            fundo_dir = "C:\\Users\\pedro\\Documents\\GitHub\\IPC_24-25\\Items_Jogo\\fundo"
+            # Get project root and check for background image
+            project_root = find_project_root()
+            fundo_dir = os.path.join(project_root, "Items_Jogo", "fundo")
+            print(f"Looking for background images in: {fundo_dir}")
+            
             if os.path.exists(fundo_dir):
                 fundo_files = os.listdir(fundo_dir)
                 print(f"Available files in fundo directory: {fundo_files}")
@@ -60,7 +83,7 @@ class BackgroundFloatLayout(FloatLayout):
                     Color(0.1, 0.1, 0.3, 1)  # Dark blue background
                     self.rect = Rectangle(pos=self.pos, size=self.size)
                 return
-                
+            
             print(f"Loading background image: {bg_file}")
             bg_image = Image(
                 source=bg_file,

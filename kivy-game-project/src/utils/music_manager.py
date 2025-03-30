@@ -2,6 +2,23 @@ import os
 import random
 from kivy.core.audio import SoundLoader
 from kivy.clock import Clock
+from pathlib import Path
+
+def find_project_root():
+    """Find the project root directory by looking for known directories"""
+    # Start with the directory of this file and go up until we find the project root
+    current_dir = Path(__file__).resolve().parent.parent.parent.parent
+    
+    # Check if we're at the project root
+    if (current_dir / "Items_Jogo").exists():
+        return str(current_dir)
+    if (current_dir.parent / "Items_Jogo").exists():
+        return str(current_dir.parent)
+    
+    # Fallback to a hardcoded path but with the correct username from the file path
+    file_path = Path(__file__).resolve()
+    username = file_path.parts[2]  # Extract username from path
+    return os.path.join('C:', os.sep, 'Users', username, 'Documents', 'GitHub', 'IPC_24-25')
 
 class MusicManager:
     def __init__(self):
@@ -9,8 +26,10 @@ class MusicManager:
         self.music_files = []
         self.volume = 1.0
         self.enabled = True
-        # Update path to use correct case and structure
-        self.music_folder = os.path.join("C:", os.sep, "Users", "pedro", "Documents", "GitHub", "IPC_24-25", "Items_Jogo", "Musicas_No_Copyright")
+        
+        # Find project root and set music folder path
+        project_root = find_project_root()
+        self.music_folder = os.path.join(project_root, "Items_Jogo", "Musicas_No_Copyright")
         print(f"Music folder path: {self.music_folder}")
         self.load_music_files()
         self.schedule = None
