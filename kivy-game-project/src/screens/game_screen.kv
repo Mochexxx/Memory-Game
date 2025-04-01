@@ -1,0 +1,118 @@
+#:kivy 2.0.0
+
+<WoodLabel@BoxLayout>:
+    text: ''
+    font_size: '24sp'
+    canvas.before:
+        Color:
+            rgba: 0.6, 0.4, 0.2, 1  # Cor base marrom
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10]
+        # Efeito de textura de madeira
+        Color:
+            rgba: 0.7, 0.5, 0.3, 0.3  # Cor mais clara para o efeito de textura
+        Line:
+            rounded_rectangle: (self.x, self.y, self.width, self.height, 10)
+            width: 2
+        # Linhas horizontais para simular textura de madeira
+        Color:
+            rgba: 0.5, 0.3, 0.1, 0.2
+        Line:
+            points: [self.x, self.y + self.height * 0.3, self.x + self.width, self.y + self.height * 0.3]
+            width: 1
+        Line:
+            points: [self.x, self.y + self.height * 0.6, self.x + self.width, self.y + self.height * 0.6]
+            width: 1
+    Label:
+        text: root.text
+        font_size: root.font_size
+        color: 1, 1, 1, 1  # Texto branco para melhor contraste
+        bold: True
+        font_name: 'Arial'
+
+<GameScreen>:
+    canvas.before:
+        Color:
+            rgba: 0.9, 0.9, 0.9, 1  # Fundo cinza claro
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        padding: 15
+        
+        # HUD (Cabeçalho)
+        BoxLayout:
+            size_hint_y: 0.12
+            spacing: 20
+            padding: [10, 5]
+            
+            WoodLabel:
+                id: score_label
+                text: "Score: 0"
+                size_hint_x: 0.4
+                opacity: 1
+                disabled: False
+            
+            WoodLabel:
+                id: timer_label
+                text: "Tempo: 0s"
+                size_hint_x: 0.4
+                opacity: 1
+                disabled: False
+        
+        # Área do Jogo
+        GridLayout:
+            id: game_grid
+            spacing: 10
+            padding: 10
+            cols: 4  # Será atualizado dinamicamente
+            size_hint_y: 0.8
+        
+        # Botões
+        BoxLayout:
+            size_hint_y: 0.1
+            spacing: 10
+            padding: [10, 5]
+            
+            Button:
+                id: reveal_button
+                text: "Revelar Cartas"
+                size_hint_x: 0.3
+                background_color: 0.5, 0.5, 0.5, 1
+                color: 1, 1, 1, 1
+                font_size: '18sp'
+                opacity: 0
+                disabled: True
+                on_release: root.reveal_cards(self)
+            
+            Widget:
+                size_hint_x: 0.4  # Espaço vazio para centralizar
+            
+            Button:
+                id: back_button
+                text: "Voltar"
+                size_hint_x: 0.3
+                background_color: 0.8, 0.2, 0.2, 1
+                color: 1, 1, 1, 1
+                font_size: '18sp'
+                on_release: root.go_back(self)
+
+<CardButton>:
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: self.rotation
+            origin: self.center
+            axis: (1, 0, 0)
+        PopMatrix
+        Color:
+            rgba: 0.95, 0.95, 0.95, 1
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: [10] 
