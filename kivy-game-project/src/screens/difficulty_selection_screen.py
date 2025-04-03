@@ -1,7 +1,6 @@
 from kivy.uix.screenmanager import Screen
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.metrics import dp
 
@@ -14,7 +13,7 @@ class DifficultySelectionScreen(Screen):
         
         # Title
         title = Label(
-            text="CONCENTRATION",
+            text="Seleção de Dificuldade",
             font_size=74,
             size_hint=(1, 0.2),
             halign='center',
@@ -22,41 +21,103 @@ class DifficultySelectionScreen(Screen):
         )
         main_layout.add_widget(title)
         
-        # Grid para os botões de dificuldade
-        button_grid = GridLayout(cols=2, spacing=dp(20), size_hint=(1, 0.7))
+        # Layout horizontal para as 3 seções
+        sections_layout = BoxLayout(orientation='horizontal', spacing=dp(20), size_hint=(1, 0.7))
         
-        # Definição das dificuldades com seus respectivos grids
-        difficulties = [
-            ("EASY 4x4", 16, (4, 4), (0, 0, 1, 1)),    # Azul
-            ("EASY 5x4", 20, (5, 4), (0, 0, 1, 1)),    # Azul
-            ("MEDIUM 6x4", 24, (6, 4), (0, 0, 1, 1)),  # Azul
-            ("MEDIUM 6x5", 30, (6, 5), (0, 0, 1, 1)),  # Azul
-            ("HARD 6x6", 36, (6, 6), (0, 0, 1, 1)),    # Azul
-            ("HARD 6x7", 42, (6, 7), (0, 0, 1, 1))     # Azul
+        # Seção Fácil
+        easy_section = BoxLayout(orientation='vertical', spacing=dp(10))
+        easy_label = Label(
+            text="Fácil",
+            font_size=dp(40),
+            size_hint=(1, 0.2),
+            halign='center',
+            valign='middle'
+        )
+        easy_section.add_widget(easy_label)
+        
+        # Botões Fácil
+        easy_buttons = [
+            ("4x4", 16, (4, 4)),
+            ("5x4", 20, (5, 4))
         ]
-        
-        # Criar botões de dificuldade
-        for text, num_cards, grid_size, color in difficulties:
+        for text, num_cards, grid_size in easy_buttons:
             btn = Button(
                 text=text,
-                size_hint=(1, None),
-                height=dp(60),
-                background_color=color,
-                background_normal='',  # Remove o gradiente padrão
-                font_size=dp(24)
+                size_hint=(1, 0.4),
+                background_color=(0, 0.5, 0, 1),
+                font_size=dp(32)
             )
             btn.bind(on_release=lambda instance, nc=num_cards, gs=grid_size: 
                     self.select_difficulty(instance, nc, gs))
-            button_grid.add_widget(btn)
+            easy_section.add_widget(btn)
         
-        main_layout.add_widget(button_grid)
+        # Seção Médio
+        medium_section = BoxLayout(orientation='vertical', spacing=dp(10))
+        medium_label = Label(
+            text="Médio",
+            font_size=dp(40),
+            size_hint=(1, 0.2),
+            halign='center',
+            valign='middle'
+        )
+        medium_section.add_widget(medium_label)
+        
+        # Botões Médio
+        medium_buttons = [
+            ("6x4", 24, (6, 4)),
+            ("6x5", 30, (6, 5))
+        ]
+        for text, num_cards, grid_size in medium_buttons:
+            btn = Button(
+                text=text,
+                size_hint=(1, 0.4),
+                background_color=(0, 0.5, 0, 1),
+                font_size=dp(32)
+            )
+            btn.bind(on_release=lambda instance, nc=num_cards, gs=grid_size: 
+                    self.select_difficulty(instance, nc, gs))
+            medium_section.add_widget(btn)
+        
+        # Seção Difícil
+        hard_section = BoxLayout(orientation='vertical', spacing=dp(10))
+        hard_label = Label(
+            text="Difícil",
+            font_size=dp(40),
+            size_hint=(1, 0.2),
+            halign='center',
+            valign='middle'
+        )
+        hard_section.add_widget(hard_label)
+        
+        # Botões Difícil
+        hard_buttons = [
+            ("6x6", 36, (6, 6)),
+            ("6x7", 42, (6, 7))
+        ]
+        for text, num_cards, grid_size in hard_buttons:
+            btn = Button(
+                text=text,
+                size_hint=(1, 0.4),
+                background_color=(0, 0.5, 0, 1),
+                font_size=dp(32)
+            )
+            btn.bind(on_release=lambda instance, nc=num_cards, gs=grid_size: 
+                    self.select_difficulty(instance, nc, gs))
+            hard_section.add_widget(btn)
+        
+        # Adiciona as seções ao layout horizontal
+        sections_layout.add_widget(easy_section)
+        sections_layout.add_widget(medium_section)
+        sections_layout.add_widget(hard_section)
+        
+        main_layout.add_widget(sections_layout)
         
         # Botão Voltar
         back_btn = Button(
             text="Voltar",
-            size_hint=(0.3, 0.1),
-            pos_hint={'center_x': 0.5},
-            background_color=(0.5, 0, 0, 1)
+            size_hint=(1, 0.1),
+            background_color=(0.5, 0, 0, 1),
+            font_size=dp(32)
         )
         back_btn.bind(on_release=self.go_back)
         main_layout.add_widget(back_btn)
@@ -67,7 +128,7 @@ class DifficultySelectionScreen(Screen):
         theme = self.manager.get_screen('theme_selection').selected_theme
         game_screen = self.manager.get_screen('game_screen')
         game_screen.apply_theme(theme, num_cards)
-        game_screen.set_grid_size(grid_size)  # Novo método para definir o tamanho do grid
+        game_screen.set_grid_size(grid_size)
         self.manager.current = 'game_screen'
     
     def go_back(self, instance):
