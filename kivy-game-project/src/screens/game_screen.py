@@ -10,6 +10,7 @@ from kivy.animation import Animation
 from kivy.uix.image import Image
 from kivy.core.audio import SoundLoader
 from kivy.properties import NumericProperty, StringProperty
+from kivy.uix.widget import Widget
 import os
 import math
 from logic.game_logic import start_game, check_win_condition  # Fix the import
@@ -61,6 +62,41 @@ class GameScreen(Screen):
     def __init__(self, **kwargs):
         super(GameScreen, self).__init__(**kwargs)
         
+        # Main layout
+        self.main_layout = BoxLayout(orientation='vertical', spacing=10, padding=15)
+        
+        # HUD (Score and Timer)
+        self.hud_layout = BoxLayout(size_hint_y=0.12, spacing=20, padding=[10, 5])
+        self.score_label = Label(text="Score: 0", size_hint_x=0.4, opacity=1, disabled=False)
+        self.timer_label = Label(text="Tempo: 0s", size_hint_x=0.4, opacity=1, disabled=False)
+        self.hud_layout.add_widget(self.score_label)
+        self.hud_layout.add_widget(self.timer_label)
+        self.main_layout.add_widget(self.hud_layout)
+        
+        # Game grid
+        self.game_grid = GridLayout(cols=4, spacing=10, padding=10, size_hint_y=0.8)
+        self.main_layout.add_widget(self.game_grid)
+        
+        # Buttons
+        self.button_layout = BoxLayout(size_hint_y=0.1, spacing=10, padding=[10, 5])
+        self.reveal_button = Button(
+            text="Revelar Cartas", size_hint_x=0.3, background_color=(0.5, 0.5, 0.5, 1),
+            color=(1, 1, 1, 1), font_size='18sp', opacity=0, disabled=True
+        )
+        self.reveal_button.bind(on_release=self.reveal_cards)
+        self.back_button = Button(
+            text="Voltar", size_hint_x=0.3, background_color=(0.8, 0.2, 0.2, 1),
+            color=(1, 1, 1, 1), font_size='18sp'
+        )
+        self.back_button.bind(on_release=self.go_back)
+        self.button_layout.add_widget(self.reveal_button)
+        self.button_layout.add_widget(Widget(size_hint_x=0.4))  # Spacer
+        self.button_layout.add_widget(self.back_button)
+        self.main_layout.add_widget(self.button_layout)
+        
+        # Add main layout to the screen
+        self.add_widget(self.main_layout)
+        
         # Inicialização de variáveis
         self.cards = []
         self.selected_cards = []
@@ -101,36 +137,28 @@ class GameScreen(Screen):
             self.audio_mode = app.settings.get('audio_assist', False)
             self.score_display = app.settings.get('score_display', True)
             self.timer_display = app.settings.get('timer_display', True)
-            self.casual_mode = app.settings.get('casual_mode', True)  # Adiciona modo casual
+            self.casual_mode = app.settings.get('casual_mode', False)  # Default to False
         else:
             self.accessibility_mode = True
             self.colorblind_mode = False
             self.audio_mode = False
             self.score_display = True
             self.timer_display = True
-            self.casual_mode = True
+            self.casual_mode = False
         
-        # Atualiza a visibilidade dos elementos do HUD
-        if hasattr(self, 'ids'):
-            # Atualiza visibilidade do score
-            if 'score_label' in self.ids:
-                self.ids.score_label.opacity = 1 if (self.score_display and self.casual_mode) else 0
-                self.ids.score_label.disabled = not (self.score_display and self.casual_mode)
-            
-            # Atualiza visibilidade do timer
-            if 'timer_label' in self.ids:
-                self.ids.timer_label.opacity = 1 if (self.timer_display and self.casual_mode) else 0
-                self.ids.timer_label.disabled = not (self.timer_display and self.casual_mode)
-            
-            # Atualiza visibilidade do botão de revelar
-            if 'reveal_button' in self.ids:
-                self.ids.reveal_button.opacity = 1 if app.settings.get('easy_mode', False) else 0
-                self.ids.reveal_button.disabled = not app.settings.get('easy_mode', False)
+        # Update HUD visibility
+        self.score_label.opacity = 1 if self.score_display else 0
+        self.score_label.disabled = not self.score_display
+        self.timer_label.opacity = 1 if self.timer_display else 0
+        self.timer_label.disabled = not self.timer_display
+        
+        # Update reveal button visibility
+        self.reveal_button.opacity = 1 if app.settings.get('easy_mode', False) else 0
+        self.reveal_button.disabled = not app.settings.get('easy_mode', False)
     
     def apply_theme(self, theme, num_cards):
         # Limpa o grid atual
-        if 'game_grid' in self.ids:
-            self.ids.game_grid.clear_widgets()
+        self.game_grid.clear_widgets()
         
         # Inicia o novo jogo
         self.cards = start_game(theme, num_cards)
@@ -139,15 +167,14 @@ class GameScreen(Screen):
         
         # Calcula o layout ótimo
         optimal_cols, card_width, card_height = self.calculate_optimal_grid(len(self.cards))
-        if 'game_grid' in self.ids:
-            self.ids.game_grid.cols = optimal_cols
+        self.game_grid.cols = optimal_cols
         
         # Limpa as cartas selecionadas
         self.selected_cards = []
         
         # Adiciona os botões das cartas
         for card in self.cards:
-            self.ids.game_grid.add_widget(self.create_card_button(card, card_width, card_height))
+            self.game_grid.add_widget(self.create_card_button(card, card_width, card_height))
         
         # Configura os sons
         self.setup_sounds(theme)
@@ -164,8 +191,7 @@ class GameScreen(Screen):
         self.multiplier = 1
         
         # Atualiza o HUD
-        if 'score_label' in self.ids:
-            self.ids.score_label.text = "Score: 0"
+        self.score_label.text = "Score: 0"
         
         # Reseta e inicia o timer
         self.stop_timer()
@@ -241,10 +267,10 @@ class GameScreen(Screen):
         optimal_cols, card_width, card_height = self.calculate_optimal_grid(num_cards)
         
         # Update grid columns
-        self.ids.game_grid.cols = optimal_cols
+        self.game_grid.cols = optimal_cols
         
         # Update card sizes
-        for widget in self.ids.game_grid.children:
+        for widget in self.game_grid.children:
             widget.size_hint = (None, None)
             widget.size = (card_width, card_height)
     
@@ -253,7 +279,7 @@ class GameScreen(Screen):
             return
         # Reset and start the timer
         self.elapsed_time = 0
-        self.ids.timer_label.text = "Tempo: 0s"
+        self.timer_label.text = "Tempo: 0s"
         # Schedule timer update every second
         self.timer_event = Clock.schedule_interval(self.update_timer, 1)
     
@@ -261,7 +287,7 @@ class GameScreen(Screen):
         if not self.timer_display:
             return
         self.elapsed_time += 1
-        self.ids.timer_label.text = f"Tempo: {self.elapsed_time}s"
+        self.timer_label.text = f"Tempo: {self.elapsed_time}s"
     
     def stop_timer(self):
         if not self.timer_display:
@@ -345,7 +371,7 @@ class GameScreen(Screen):
             self.multiplier = min(self.consecutive_matches, 5)  # Cap multiplier at 5
             self.score += 1 * self.multiplier
             if self.score_display:
-                self.ids.score_label.text = f"Score: {self.score}"
+                self.score_label.text = f"Score: {self.score}"
             
             # Solução simplificada: Apenas verifique se este é o último par
             total_pairs = len(self.cards) // 2
@@ -367,7 +393,7 @@ class GameScreen(Screen):
             else:
                 self.score = max(self.score - 1, 0)  # Ensure score does not go below zero
                 if self.score_display:
-                    self.ids.score_label.text = f"Score: {self.score}"
+                    self.score_label.text = f"Score: {self.score}"
             
             # Animate cards back to face down
             for widget, card in self.selected_cards:
@@ -447,10 +473,10 @@ class GameScreen(Screen):
             return
         
         self.easy_mode_used = True
-        self.ids.reveal_button.disabled = True
+        self.reveal_button.disabled = True
         
         # Reveal all cards with animation
-        for card, widget in zip(self.cards, self.ids.game_grid.children):
+        for card, widget in zip(self.cards, self.game_grid.children):
             if widget in self.card_animations:
                 self.card_animations[widget].cancel(self.card_animations[widget])
             
@@ -469,7 +495,7 @@ class GameScreen(Screen):
         Clock.schedule_once(self.hide_cards, 2)
     
     def hide_cards(self, dt):
-        for card, widget in zip(self.cards, self.ids.game_grid.children):
+        for card, widget in zip(self.cards, self.game_grid.children):
             if not card["matched"]:
                 if widget in self.card_animations:
                     self.card_animations[widget].cancel(self.card_animations[widget])
@@ -491,9 +517,8 @@ class GameScreen(Screen):
     def set_grid_size(self, grid_size):
         """Define o tamanho do grid (colunas x linhas)"""
         self.grid_cols, self.grid_rows = grid_size
-        if hasattr(self, 'ids') and 'game_grid' in self.ids:
-            self.ids.game_grid.cols = self.grid_cols
-            self.update_card_layout()
+        self.game_grid.cols = self.grid_cols
+        self.update_card_layout()
 
     def get_wood_texture_path(self):
         """Retorna o caminho para a textura de madeira"""
