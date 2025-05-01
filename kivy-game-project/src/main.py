@@ -4,6 +4,17 @@ from kivy.core.window import Window
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.image import Image
 from kivy.graphics import Color, Rectangle  # Add missing import
+from kivy import Config
+from kivy.clock import Clock
+
+# Set OpenGL ES 2.0 for better rendering performance
+Config.set('graphics', 'multisamples', '0')  # Disable multisampling for performance
+Config.set('graphics', 'maxfps', '240')  # Cap FPS to 240 for high refresh rate
+Config.set('graphics', 'vsync', '0')  # Disable VSync to allow uncapped FPS
+Config.set('graphics', 'frame_interval', '1')  # Force frame interval to 1 for maximum FPS
+
+# Enable FPS monitor for debugging
+Config.set('kivy', 'show_fps', '1')
 
 # Import settings manager
 from utils.settings_manager import load_settings, save_settings
@@ -50,8 +61,10 @@ class BackgroundFloatLayout(FloatLayout):
     """A float layout with a background image"""
     def __init__(self, **kwargs):
         super(BackgroundFloatLayout, self).__init__(**kwargs)
-        
-        # Add background image as the first (bottom) widget
+        self.bg_image = None  # Cache the background image
+        self.setup_background()
+
+    def setup_background(self):
         try:
             # Get project root and check for background image
             project_root = find_project_root()
@@ -70,35 +83,31 @@ class BackgroundFloatLayout(FloatLayout):
                     bg_file = os.path.join(fundo_dir, image_files[0])
                     print(f"Using alternative background file: {bg_file}")
                 else:
-                    # Fallback to a solid color
-                    print("No suitable background image found. Using solid color.")
-                    with self.canvas.before:
-                        Color(0.1, 0.1, 0.3, 1)  # Dark blue background
-                        self.rect = Rectangle(pos=self.pos, size=self.size)
+                    self._set_solid_color_background()
                     return
             else:
                 print(f"Background directory does not exist: {fundo_dir}")
-                # Fallback to a solid color
-                with self.canvas.before:
-                    Color(0.1, 0.1, 0.3, 1)  # Dark blue background
-                    self.rect = Rectangle(pos=self.pos, size=self.size)
+                self._set_solid_color_background()
                 return
             
-            print(f"Loading background image: {bg_file}")
-            bg_image = Image(
-                source=bg_file,
-                allow_stretch=True,
-                keep_ratio=False,
-                size_hint=(1, 1),
-                pos_hint={'center_x': 0.5, 'center_y': 0.5}
-            )
-            self.add_widget(bg_image)
+            if not self.bg_image:
+                print(f"Loading background image: {bg_file}")
+                self.bg_image = Image(
+                    source=bg_file,
+                    allow_stretch=True,
+                    keep_ratio=False,
+                    size_hint=(1, 1),
+                    pos_hint={'center_x': 0.5, 'center_y': 0.5}
+                )
+                self.add_widget(self.bg_image)
         except Exception as e:
             print(f"Error loading background image: {e}")
-            # Fallback to a solid color if image loading fails
-            with self.canvas.before:
-                Color(0.1, 0.1, 0.3, 1)  # Dark blue background
-                self.rect = Rectangle(pos=self.pos, size=self.size)
+            self._set_solid_color_background()
+
+    def _set_solid_color_background(self):
+        with self.canvas.before:
+            Color(0.1, 0.1, 0.3, 1)  # Dark blue background
+            self.rect = Rectangle(pos=self.pos, size=self.size)
 
 class MyScreenManager(ScreenManager):
     pass
@@ -171,6 +180,12 @@ class MemoryGameApp(App):
             import traceback
             traceback.print_exc()
         
+        Window.clearcolor = (0, 0, 0, 1)  # Set a default black background for better performance
+        Window.allow_screensaver = False  # Prevent screensaver interruptions
+
+        # Force the Kivy clock to tick at 240 FPS
+        Clock.max_iteration = 1  # Ensure the clock processes only one frame per tick
+
         return root
     
     def on_stop(self):

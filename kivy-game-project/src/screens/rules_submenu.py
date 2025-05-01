@@ -7,6 +7,13 @@ from kivy.uix.scrollview import ScrollView
 class RulesSubmenu(Screen):
     def __init__(self, **kwargs):
         super(RulesSubmenu, self).__init__(**kwargs)
+        self.layout = None
+        self.setup_ui()
+
+    def setup_ui(self):
+        if self.layout:
+            return
+
         self.layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
         self.title = Label(text="Regras", font_size=74, size_hint=(1, 0.2))
@@ -76,9 +83,9 @@ class RulesSubmenu(Screen):
         self.layout.add_widget(back_btn)
     
     def reset_menu(self, instance):
-        # Reset the layout to the original menu
+        # Reset the layout without recreating widgets
         self.layout.clear_widgets()
-        self.__init__()
+        self.setup_ui()
     
     def go_back(self, instance):
         self.manager.current = 'main_menu'

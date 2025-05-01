@@ -9,9 +9,16 @@ from widgets.stats_display import StatsDisplay
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
-        
-        # Use a FloatLayout as the main container to allow absolute positioning
-        main_layout = FloatLayout()
+        self.main_layout = None
+        self.stats_display = None
+        self.setup_ui()
+
+    def setup_ui(self):
+        # Avoid recreating layouts unnecessarily
+        if self.main_layout:
+            return
+
+        self.main_layout = FloatLayout()
         
         # Menu buttons in a vertical layout
         menu_layout = BoxLayout(
@@ -38,21 +45,21 @@ class MainMenu(Screen):
             btn.bind(on_release=callback)
             menu_layout.add_widget(btn)
         
-        main_layout.add_widget(menu_layout)
+        self.main_layout.add_widget(menu_layout)
         
         # Create stats panel with appropriate size and position
         self.stats_display = StatsDisplay(
             size_hint=(0.3, None),  # Fixed width but auto height
             pos_hint={'right': 0.95, 'top': 0.85}  # Position at top right
         )
-        main_layout.add_widget(self.stats_display)
+        self.main_layout.add_widget(self.stats_display)
         
-        self.add_widget(main_layout)
+        self.add_widget(self.main_layout)
     
     def on_enter(self):
         """Called when the screen is entered"""
         # Always update statistics when returning to the main menu
-        if hasattr(self, 'stats_display'):
+        if self.stats_display:
             print("Updating stats display")
             self.stats_display.update_stats()
     
