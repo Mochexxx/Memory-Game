@@ -184,7 +184,7 @@ class MemoryGameApp(App):
         Window.allow_screensaver = False  # Prevent screensaver interruptions
 
         # Force the Kivy clock to tick at 240 FPS
-        Clock.max_iteration = 1  # Ensure the clock processes only one frame per tick
+        Clock.max_iteration = 50  # Increase the maximum iterations to handle heavy computations
 
         return root
     

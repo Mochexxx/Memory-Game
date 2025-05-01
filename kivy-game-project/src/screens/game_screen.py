@@ -152,9 +152,13 @@ class GameScreen(Screen):
         self.timer_label.opacity = 1 if self.timer_display else 0
         self.timer_label.disabled = not self.timer_display
         
-        # Update reveal button visibility
-        self.reveal_button.opacity = 1 if app.settings.get('easy_mode', False) else 0
-        self.reveal_button.disabled = not app.settings.get('easy_mode', False)
+        # Update reveal button visibility and enable/disable state
+        if app.settings.get('easy_mode', False):
+            self.reveal_button.opacity = 1
+            self.reveal_button.disabled = False
+        else:
+            self.reveal_button.opacity = 0
+            self.reveal_button.disabled = True
     
     def apply_theme(self, theme, num_cards):
         # Limpa o grid atual
@@ -183,19 +187,24 @@ class GameScreen(Screen):
         self.reset_game()
     
     def reset_game(self):
-        """Reseta o estado do jogo"""
+        """Resets the game state, including Easy Mode usage."""
         self.score = 0
         self.lives = 3
-        self.easy_mode_used = False
+        self.easy_mode_used = False  # Reset Easy Mode usage
         self.consecutive_matches = 0
         self.multiplier = 1
-        
-        # Atualiza o HUD
+
+        # Update the HUD
         self.score_label.text = "Score: 0"
-        
-        # Reseta e inicia o timer
+
+        # Reset and start the timer
         self.stop_timer()
         self.start_timer()
+
+        # Re-enable the reveal button if Easy Mode is active
+        app = App.get_running_app()
+        if app.settings.get('easy_mode', False):
+            self.reveal_button.disabled = False
     
     def setup_sounds(self, theme):
         """Configura os sons para o tema atual"""
@@ -470,46 +479,26 @@ class GameScreen(Screen):
 
     def reveal_cards(self, instance):
         if self.easy_mode_used:
-            return
-        
+            return  # Prevent multiple uses
+
         self.easy_mode_used = True
         self.reveal_button.disabled = True
-        
+
         # Reveal all cards with animation
         for card, widget in zip(self.cards, self.game_grid.children):
-            if widget in self.card_animations:
-                self.card_animations[widget].cancel(self.card_animations[widget])
-            
             card["flipped"] = True
-            anim = Animation(rotation=180, duration=0.5)
-            
-            def on_complete(animation, widget, card):
-                widget.background_normal = card["image"]
-                widget.background_down = card["image"]
-            
-            anim.bind(on_complete=on_complete)
-            self.card_animations[widget] = anim
-            anim.start(widget)
-        
+            widget.background_normal = card["image"]
+            widget.background_down = card["image"]
+
         # Schedule to hide cards after 2 seconds
         Clock.schedule_once(self.hide_cards, 2)
-    
+
     def hide_cards(self, dt):
         for card, widget in zip(self.cards, self.game_grid.children):
-            if not card["matched"]:
-                if widget in self.card_animations:
-                    self.card_animations[widget].cancel(self.card_animations[widget])
-                
+            if not card["matched"]:  # Only hide unmatched cards
                 card["flipped"] = False
-                anim = Animation(rotation=0, duration=0.5)
-                
-                def on_complete(animation, widget):
-                    widget.background_normal = self.card_back_path
-                    widget.background_down = self.card_back_path
-                
-                anim.bind(on_complete=on_complete)
-                self.card_animations[widget] = anim
-                anim.start(widget)
+                widget.background_normal = self.card_back_path
+                widget.background_down = self.card_back_path
     
     def go_back(self, instance):
         self.manager.current = 'main_menu'
