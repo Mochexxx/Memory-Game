@@ -4,6 +4,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.switch import Switch
+from kivy.uix.slider import Slider
 from kivy.app import App
 from kivy.metrics import dp
 from utils.settings_manager import save_settings
@@ -62,6 +63,15 @@ class AdaptationsScreen(Screen):
             self.easy_mode_switch_factory
         )
         content_layout.add_widget(option_layout_easy_mode)
+        
+        # Text size scaling with explanation
+        option_layout_text_size_scaling = self.create_option_layout(
+            "Escala do Tamanho do Texto", 
+            "Ajusta o tamanho do texto em todo o jogo",
+            self.text_size_scaling_slider_factory,
+            is_slider=True
+        )
+        content_layout.add_widget(option_layout_text_size_scaling)
         
         scroll_view.add_widget(content_layout)
         main_layout.add_widget(scroll_view)
@@ -154,6 +164,11 @@ class AdaptationsScreen(Screen):
         self.easy_mode_switch.bind(active=self.on_easy_mode_toggle)
         return self.easy_mode_switch
     
+    def text_size_scaling_slider_factory(self):
+        self.text_size_scaling_slider = Slider(min=0.5, max=2.0, value=1.0)
+        self.text_size_scaling_slider.bind(value=self.on_text_size_scaling_change)
+        return self.text_size_scaling_slider
+    
     def get_font_size(self, base_size):
         # Scale font size based on any app-level settings
         app = App.get_running_app()
@@ -173,6 +188,7 @@ class AdaptationsScreen(Screen):
             self.audio_assist_switch.active = app.settings.get('audio_assist', False)
             self.visual_feedback_switch.active = app.settings.get('visual_feedback', True)
             self.easy_mode_switch.active = app.settings.get('easy_mode', False)
+            self.text_size_scaling_slider.value = app.settings.get('text_size_factor', 1.0)
     
     def on_colorblind_toggle(self, instance, value):
         app = App.get_running_app()
@@ -202,6 +218,13 @@ class AdaptationsScreen(Screen):
             save_settings(app.settings)
         print(f"Easy mode: {'on' if value else 'off'}")
     
+    def on_text_size_scaling_change(self, instance, value):
+        app = App.get_running_app()
+        if hasattr(app, 'settings'):
+            app.settings['text_size_factor'] = value
+            save_settings(app.settings)
+        print(f"Text size scaling: {value}")
+    
     def save_options(self, instance):
         # Save all settings to a global app state or file
         app = App.get_running_app()
@@ -212,6 +235,7 @@ class AdaptationsScreen(Screen):
         app.settings['audio_assist'] = self.audio_assist_switch.active
         app.settings['visual_feedback'] = self.visual_feedback_switch.active
         app.settings['easy_mode'] = self.easy_mode_switch.active
+        app.settings['text_size_factor'] = self.text_size_scaling_slider.value
         
         # Save settings to file
         save_settings(app.settings)
