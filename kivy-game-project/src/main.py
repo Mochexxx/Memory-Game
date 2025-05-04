@@ -6,6 +6,8 @@ from kivy.uix.image import Image
 from kivy.graphics import Color, Rectangle  # Add missing import
 from kivy import Config
 from kivy.clock import Clock
+from kivy.uix.widget import Widget
+from kivy.properties import ObjectProperty
 
 # Set OpenGL ES 2.0 for better rendering performance
 Config.set('graphics', 'multisamples', '0')  # Disable multisampling for performance
@@ -39,6 +41,7 @@ from screens.information_screens import (
 from screens.rules_submenu import RulesSubmenu
 from screens.adaptations_screen import AdaptationsScreen
 from screens.match_screen import MatchScreen
+from screens.esc_submenu import EscSubmenu
 # Removed elegant menu import
 
 def find_project_root():
@@ -58,7 +61,8 @@ def find_project_root():
     return os.path.join('C:', os.sep, 'Users', username, 'Documents', 'GitHub', 'IPC_24-25')
 
 class BackgroundFloatLayout(FloatLayout):
-    """A float layout with a background image"""
+    screen_manager = ObjectProperty(None)  # Add a property to reference the ScreenManager
+
     def __init__(self, **kwargs):
         super(BackgroundFloatLayout, self).__init__(**kwargs)
         self.bg_image = None  # Cache the background image
@@ -129,6 +133,18 @@ class MemoryGameApp(App):
             # Set to windowed mode but maximized
             Window.fullscreen = False
             Window.maximize()
+
+        # Bind ESC key to open the ESC submenu
+        Window.bind(on_key_down=self.on_key_down)
+
+    def on_key_down(self, window, key, *args):
+        # Open the ESC submenu when ESC is pressed
+        if key == 27:  # 27 is the keycode for ESC
+            if self.root.screen_manager.current == 'game_screen':
+                self.root.screen_manager.current = 'esc_submenu'
+                return True  # Prevent default behavior
+
+        return False  # Allow other keys to function normally
     
     def on_start(self):
         """Called when the application starts"""
@@ -159,6 +175,10 @@ class MemoryGameApp(App):
         sm.add_widget(WinScreen(name='win_screen'))
         sm.add_widget(RulesSubmenu(name='rules_submenu'))
         sm.add_widget(MatchScreen(name='match_screen'))
+        sm.add_widget(EscSubmenu(name='esc_submenu'))  # Add ESC submenu
+
+        # Assign the screen manager to the root's property
+        root.screen_manager = sm
         
         # Add the screen manager to the root layout (on top of the background)
         root.add_widget(sm)
