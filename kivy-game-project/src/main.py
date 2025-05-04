@@ -141,8 +141,15 @@ class MemoryGameApp(App):
         # Open the ESC submenu when ESC is pressed
         if key == 27:  # 27 is the keycode for ESC
             if self.root.screen_manager.current == 'game_screen':
+                # Stop the timer before switching screens
+                game_screen = self.root.screen_manager.get_screen('game_screen')
+                game_screen.stop_timer()
+                
                 self.root.screen_manager.current = 'esc_submenu'
                 return True  # Prevent default behavior
+            elif self.root.screen_manager.current == 'esc_submenu':
+                # Prevent closing the app when ESC is pressed in the ESC menu
+                return True
 
         return False  # Allow other keys to function normally
     

@@ -75,7 +75,7 @@ class WinScreen(Screen):
         self.main_menu_btn = Button(
             text="Menu Principal",
             font_size=32,
-            background_color=(0.5, 0, 0, 1)
+            background_color=(1, 0, 0, 1)  # Changed to red
         )
         self.main_menu_btn.bind(on_release=self.go_to_main_menu)
         self.buttons_layout.add_widget(self.main_menu_btn)

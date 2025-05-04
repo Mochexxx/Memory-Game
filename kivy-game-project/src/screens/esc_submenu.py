@@ -22,26 +22,41 @@ class EscSubmenu(Screen):
 
         # Buttons
         buttons = [
-            ("Voltar ao Menu Principal", self.go_to_main_menu),
-            ("Retomar Jogo", self.resume_game)
+            ("Retomar Jogo", self.resume_game),  # Swapped positions
+            ("Voltar ao Menu Principal", self.go_to_main_menu)  # Swapped positions
         ]
 
         for text, callback in buttons:
-            btn = Button(
-                text=text,
-                size_hint=(1, 0.2),
-                background_color=(0, 0.5, 0, 1)
-            )
+            if text == "Retomar Jogo":
+                btn = Button(
+                    text=text,
+                    size_hint=(1, 0.2),
+                    background_color=(0, 0.7, 0, 1)  # Green for Retomar Jogo
+                )
+            else:
+                btn = Button(
+                    text=text,
+                    size_hint=(1, 0.2),
+                    background_color=(1, 0, 0, 1)  # Red for other buttons
+                )
             btn.bind(on_release=callback)
             layout.add_widget(btn)
 
         self.add_widget(layout)
 
     def go_to_main_menu(self, instance):
+        # Stop the game and go back to the main menu
+        from kivy.app import App
+        app = App.get_running_app()
+        game_screen = self.manager.get_screen('game_screen')
+        game_screen.stop_timer()  # Stop the timer
         self.manager.current = 'main_menu'
 
     def resume_game(self, instance):
+        # Resume the game and restart the timer
         self.manager.current = 'game_screen'
+        game_screen = self.manager.get_screen('game_screen')
+        game_screen.start_timer()  # Restart the timer
 
     def show_options(self, instance):
         self.manager.current = 'options_screen'

@@ -26,7 +26,10 @@ class RulesSubmenu(Screen):
         ]
         
         for text, callback in self.buttons:
-            btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
+            if text == "Voltar":
+                btn = Button(text=text, size_hint=(1, 0.2), background_color=(1, 0, 0, 1))  # Changed to red
+            else:
+                btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
             btn.bind(on_release=callback)
             self.layout.add_widget(btn)
         
