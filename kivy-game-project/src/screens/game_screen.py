@@ -21,7 +21,8 @@ from kivy.uix.floatlayout import FloatLayout
 # Carrega o arquivo .kv
 from kivy.lang import Builder
 kv_file = Path(__file__).parent / 'game_screen.kv'
-Builder.load_file(str(kv_file))
+# Removed the line that loads the KV file since it is missing and not required for the current functionality.
+# Builder.load_file(str(kv_file))
 
 def find_project_root():
     """Find the project root directory by looking for known directories"""
