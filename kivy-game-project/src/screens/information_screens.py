@@ -157,7 +157,7 @@ class GameStructureScreen(InformationScreenBase):
             "The game consists of a board game where the cards are initially face down.",
             "The cards have different shapes and patterns to facilitate visual identification.",
             "Each card has a unique sound effect (within the same category) to aid memorization.",
-            "There is a high color contrast to make it easier for colorblind players to see the cards."
+            "For colorblind players, cards can be displayed in black and white to improve visibility."
         ]
         
         for line in game_structure:

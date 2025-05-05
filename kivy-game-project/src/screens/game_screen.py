@@ -214,6 +214,24 @@ class GameScreen(Screen):
         # Clear the current grid
         self.game_grid.clear_widgets()
         
+        # Check for colorblind mode and modify theme path if needed
+        app = App.get_running_app()
+        colorblind_enabled = hasattr(app, 'settings') and app.settings.get('colorblind_mode', False)
+        
+        # Store original theme for audio lookup
+        original_theme = theme
+        
+        if colorblind_enabled:
+            # Convert the original theme path to the black and white version
+            project_root = find_project_root()
+            
+            if "baralho_animais" in theme:
+                theme = os.path.join(project_root, "Items_Jogo", "baralho_animais_preto_e_branco")
+                print(f"Using black and white animal theme: {theme}")
+            elif "baralho_numeros" in theme:
+                theme = os.path.join(project_root, "Items_Jogo", "baralho_numeros_preto_e_branco")
+                print(f"Using black and white numbers theme: {theme}")
+        
         # Start the new game
         self.cards = start_game(theme, num_cards)
         self.current_theme = theme
@@ -230,8 +248,8 @@ class GameScreen(Screen):
         for card in self.cards:
             self.game_grid.add_widget(self.create_card_button(card, card_width, card_height))
         
-        # Configure sounds for the current theme
-        self.setup_sounds(theme)
+        # Configure sounds for the current theme - always use original theme for sound folder
+        self.setup_sounds(original_theme)
         
         # Reset the game
         self.reset_game()
@@ -277,10 +295,21 @@ class GameScreen(Screen):
         # Load new sounds
         for card in self.cards:
             base_filename = os.path.basename(card["image"])
-            sound_path = os.path.join(sound_folder, base_filename.replace(".png", ".wav"))
+            
+            # Handle black and white image filenames for sound matching
+            if "_B&W" in base_filename:
+                # Remove the _B&W suffix to get the original filename for sound lookup
+                base_sound_filename = base_filename.replace("_B&W.png", ".wav")
+            else:
+                # Regular image file
+                base_sound_filename = base_filename.replace(".png", ".wav")
+            
+            sound_path = os.path.join(sound_folder, base_sound_filename)
             
             if os.path.exists(sound_path):
                 self.sounds[card["image"]] = SoundLoader.load(sound_path)
+            else:
+                print(f"Sound file not found: {sound_path}")
     
     def calculate_optimal_grid(self, num_cards):
         """Calculate the optimal card size based on screen dimensions and grid size"""

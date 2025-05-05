@@ -35,7 +35,7 @@ class AdaptationsScreen(Screen):
         # Colorblind mode with explanation
         option_layout1 = self.create_option_layout(
             "Colorblind Mode", 
-            "Increases contrast and uses colorblind-friendly palettes",
+            "Cards will be displayed in black and white to help colorblind players",
             self.colorblind_switch_factory
         )
         content_layout.add_widget(option_layout1)
