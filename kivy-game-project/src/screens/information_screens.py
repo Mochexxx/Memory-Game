@@ -26,7 +26,7 @@ class AdaptationsScreen(InformationScreenBase):
         
         # Title with dynamic font size
         title = Label(
-            text="Adaptações",
+            text="Adaptations",
             font_size=self.get_font_size(74),
             size_hint=(1, 0.2),
             halign='center',
@@ -41,9 +41,9 @@ class AdaptationsScreen(InformationScreenBase):
         content_layout.bind(minimum_height=content_layout.setter('height'))
         
         adaptations = [
-            "O jogo possui um modo para jogadores com daltonismo.",
-            "O jogo possui um modo para jogadores com deficiência auditiva.",
-            "O jogo possui um modo para jogadores com deficiência visual."
+            "The game has a mode for players with color blindness.",
+            "The game has a mode for players with hearing impairments.",
+            "The game has a mode for players with visual impairments."
         ]
         
         for adaptation in adaptations:
@@ -81,7 +81,7 @@ class HowToPlayScreen(InformationScreenBase):
         
         # Title with dynamic font size
         title = Label(
-            text="Como Jogar",
+            text="How to Play",
             font_size=self.get_font_size(74),
             size_hint=(1, 0.2),
             halign='center',
@@ -96,12 +96,12 @@ class HowToPlayScreen(InformationScreenBase):
         content_layout.bind(minimum_height=content_layout.setter('height'))
         
         how_to_play = [
-            "O jogador deve clicar em duas cartas para virá-las, se as mesmas forem iguais irá pontuar e as cartas permanecerão viradas.",
-            "Se as cartas forem diferentes, elas voltarão à posição original.",
-            "O jogo termina quando todas as cartas forem viradas.",
-            "Existe também um contador de tempo para medir o tempo de jogo.",
-            "O jogador pode escolher entre 3 níveis de dificuldade: fácil, médio e difícil.",
-            "O jogador pode escolher entre 3 temas: animais, frutas e números."
+            "The player must click on two cards to flip them. If they match, the player scores, and the cards remain flipped.",
+            "If the cards are different, they return to their original position.",
+            "The game ends when all cards are flipped.",
+            "There is also a timer to measure the game duration.",
+            "The player can choose between 3 difficulty levels: easy, medium, and hard.",
+            "The player can choose between 3 themes: animals, fruits, and numbers."
         ]
         
         for line in how_to_play:
@@ -139,7 +139,7 @@ class GameStructureScreen(InformationScreenBase):
         
         # Title with dynamic font size
         title = Label(
-            text="Estrutura do Jogo",
+            text="Game Structure",
             font_size=self.get_font_size(74),
             size_hint=(1, 0.2),
             halign='center',
@@ -154,10 +154,10 @@ class GameStructureScreen(InformationScreenBase):
         content_layout.bind(minimum_height=content_layout.setter('height'))
         
         game_structure = [
-            "O jogo consiste num jogo de tabuleiro onde as cartas inicialmente estarão viradas para baixo.",
-            "As cartas possuem formas e padrões diferentes para facilitar a identificação visual.",
-            "Cada carta tem um efeito sonoro único (dentro da mesma categoria) para facilitar a memorização.",
-            "Há um alto contraste de cores para facilitar a visualização das cartas para jogadores com daltonismo."
+            "The game consists of a board game where the cards are initially face down.",
+            "The cards have different shapes and patterns to facilitate visual identification.",
+            "Each card has a unique sound effect (within the same category) to aid memorization.",
+            "There is a high color contrast to make it easier for colorblind players to see the cards."
         ]
         
         for line in game_structure:

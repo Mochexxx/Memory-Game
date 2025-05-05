@@ -432,8 +432,12 @@ class GameScreen(Screen):
         widget1, card1 = self.selected_cards[0]
         widget2, card2 = self.selected_cards[1]
         is_match = card1["image"] == card2["image"]
-            
-        if is_match:
+        
+        # Check if visual feedback is enabled
+        app = App.get_running_app()
+        visual_feedback_enabled = app.settings.get('visual_feedback', True)
+
+        if is_match and visual_feedback_enabled:
             # This is a match! Mark cards as matched
             card1["matched"] = True
             card2["matched"] = True
@@ -442,17 +446,23 @@ class GameScreen(Screen):
             self.score += 1 * self.multiplier
             if self.score_display:
                 self.score_label.text = f"Score: {self.score}"
-            
+
             # Simplified solution: Just check if this is the last pair
             total_pairs = len(self.cards) // 2
             matched_pairs = sum(1 for card in self.cards if card["matched"]) // 2
-            
+
             # If NOT the last pair (at least one pair is still missing), show the match screen
             if matched_pairs < total_pairs:
                 match_screen = self.manager.get_screen('match_screen')
                 match_screen.show_match()
-            
+
             # Clear selected cards and allow new selections immediately
+            self.selected_cards = []
+            self.is_checking = False
+        elif is_match:
+            # If visual feedback is disabled, just mark cards as matched without showing the pair
+            card1["matched"] = True
+            card2["matched"] = True
             self.selected_cards = []
             self.is_checking = False
         else:
