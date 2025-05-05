@@ -29,7 +29,7 @@ class StatsDisplay(BoxLayout):
         
         # Stats title
         self.title = Label(
-            text="Estatísticas",  # Shortened title
+            text="Statistics",  # Translated from "Estatísticas"
             font_size=24, 
             color=(0.9, 0.9, 1, 1),
             size_hint=(1, None),
@@ -50,10 +50,10 @@ class StatsDisplay(BoxLayout):
         self.row_heights = dp(30)  # Reduced row height
         
         stat_keys = [
-            ("Partidas Jogadas", "0"),
-            ("Melhor Pontuação", "0"),
-            ("Tempo Total", "0s"),
-            ("Pares Encontrados", "0")
+            ("Games Played", "0"),
+            ("Best Score", "0"),
+            ("Total Time", "0s"),
+            ("Pairs Found", "0")
         ]
         
         for key, default_value in stat_keys:
@@ -115,10 +115,10 @@ class StatsDisplay(BoxLayout):
         try:
             stats = load_stats()
             
-            self.stats_rows["Partidas Jogadas"].text = str(stats['games_played'])
-            self.stats_rows["Melhor Pontuação"].text = str(stats['best_score'])
-            self.stats_rows["Tempo Total"].text = format_time(stats['total_time'])
-            self.stats_rows["Pares Encontrados"].text = str(stats['pairs_matched'])
+            self.stats_rows["Games Played"].text = str(stats['games_played'])
+            self.stats_rows["Best Score"].text = str(stats['best_score'])
+            self.stats_rows["Total Time"].text = format_time(stats['total_time'])
+            self.stats_rows["Pairs Found"].text = str(stats['pairs_matched'])
             
             print("Statistics loaded successfully")
         except Exception as e:
