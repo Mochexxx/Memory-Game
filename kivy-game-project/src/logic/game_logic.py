@@ -48,8 +48,28 @@ def save_game_data():
     pass
 
 def generate_cards(theme, num_cards):
+    """
+    Gera as cartas para o jogo.
+    
+    Args:
+        theme (str): Caminho para o diretório do tema
+        num_cards (int): Número total de cartas (deve ser par)
+    
+    Returns:
+        list: Lista de dicionários representando as cartas
+    """
+    # Verifica se o número de cartas é par
+    if num_cards % 2 != 0:
+        raise ValueError("O número de cartas deve ser par")
+    
     # Load images from the selected theme directory
     images = [os.path.join(theme, img) for img in os.listdir(theme) if img.endswith('.png')]
+    
+    # Verifica se há imagens suficientes
+    if len(images) < num_cards // 2:
+        raise ValueError(f"Não há imagens suficientes no tema. Necessário: {num_cards // 2}, Disponível: {len(images)}")
+    
+    # Seleciona o número correto de imagens e duplica para formar os pares
     images = images[:num_cards // 2] * 2
     random.shuffle(images)
     
