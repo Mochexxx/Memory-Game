@@ -31,15 +31,15 @@ class MainMenu(Screen):
             pos_hint={'x': 0.05, 'center_y': 0.5}
         )
         
-        title = Label(text="Jogo de Memória", font_size=74, size_hint=(1, 0.2))
+        title = Label(text="Memory Game", font_size=74, size_hint=(1, 0.2))
         menu_layout.add_widget(title)
         
         buttons = [
-            ("Iniciar Jogo", self.start_game),
-            ("Opções", self.show_options),
-            ("Adaptações", self.show_adaptations),
-            ("Regras", self.show_rules),
-            ("Sair", self.quit_game)
+            ("Start Game", self.start_game),
+            ("Options", self.show_options),
+            ("Adaptations", self.show_adaptations),
+            ("Rules", self.show_rules),
+            ("Quit", self.quit_game)
         ]
         
         for text, callback in buttons:

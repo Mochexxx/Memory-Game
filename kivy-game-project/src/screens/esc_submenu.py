@@ -12,7 +12,7 @@ class EscSubmenu(Screen):
 
         # Title
         title = Label(
-            text="Menu ESC",
+            text="ESC Menu",
             font_size=74,
             size_hint=(1, 0.2),
             halign='center',
@@ -22,16 +22,16 @@ class EscSubmenu(Screen):
 
         # Buttons
         buttons = [
-            ("Retomar Jogo", self.resume_game),  # Swapped positions
-            ("Voltar ao Menu Principal", self.go_to_main_menu)  # Swapped positions
+            ("Resume Game", self.resume_game),
+            ("Back to Main Menu", self.go_to_main_menu)
         ]
 
         for text, callback in buttons:
-            if text == "Retomar Jogo":
+            if text == "Resume Game":
                 btn = Button(
                     text=text,
                     size_hint=(1, 0.2),
-                    background_color=(0, 0.7, 0, 1)  # Green for Retomar Jogo
+                    background_color=(0, 0.7, 0, 1)  # Green for Resume Game
                 )
             else:
                 btn = Button(

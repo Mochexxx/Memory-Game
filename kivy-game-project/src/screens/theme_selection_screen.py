@@ -33,7 +33,7 @@ class ThemeSelectionScreen(Screen):
         
         layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
-        title = Label(text="Seleção de Tema", font_size=74, size_hint=(1, 0.2))
+        title = Label(text="Theme Selection", font_size=74, size_hint=(1, 0.2))
         layout.add_widget(title)
         
         # Adjust layout for smaller and more organized buttons
@@ -41,8 +41,8 @@ class ThemeSelectionScreen(Screen):
 
         # Use project_root to construct paths for both themes
         themes = [
-            ("Tema Animais", self.select_theme_animals, os.path.join(project_root, "Items_Jogo", "baralho_animais")),
-            ("Tema Números", self.select_theme_numbers, os.path.join(project_root, "Items_Jogo", "baralho_numeros"))
+            ("Animal Theme", self.select_theme_animals, os.path.join(project_root, "Items_Jogo", "baralho_animais")),
+            ("Number Theme", self.select_theme_numbers, os.path.join(project_root, "Items_Jogo", "baralho_numeros"))
         ]
 
         # Adjust layout for smaller buttons with reduced width and centered alignment
@@ -61,7 +61,7 @@ class ThemeSelectionScreen(Screen):
 
         # Adjust back button to be smaller and centered
         back_btn = ToggleButton(
-            text="Voltar",
+            text="Back",
             size_hint=(0.5, 0.1),  # Reduced width
             pos_hint={'center_x': 0.5},  # Center horizontally
             background_color=(0.5, 0, 0, 1),

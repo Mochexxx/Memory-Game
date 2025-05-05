@@ -67,7 +67,7 @@ def generate_cards(theme, num_cards):
     
     # Verifica se há imagens suficientes
     if len(images) < num_cards // 2:
-        raise ValueError(f"Não há imagens suficientes no tema. Necessário: {num_cards // 2}, Disponível: {len(images)}")
+        raise ValueError(f"Not enough images in the theme. Required: {num_cards // 2}, Available: {len(images)}")
     
     # Seleciona o número correto de imagens e duplica para formar os pares
     images = images[:num_cards // 2] * 2

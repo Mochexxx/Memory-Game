@@ -20,7 +20,7 @@ class OptionsScreen(Screen):
         
         # Title with dynamic font size
         title = Label(
-            text="Opções do Jogo",
+            text="Game Options",
             font_size=self.get_font_size(60),
             size_hint=(1, 0.15),
             halign='center',
@@ -36,16 +36,16 @@ class OptionsScreen(Screen):
         
         # Fullscreen mode with explanation
         option_layout_fullscreen = self.create_option_layout(
-            "Modo Tela Cheia", 
-            "Alterna entre modo janela e tela cheia",
+            "Fullscreen Mode", 
+            "Toggle between windowed and fullscreen mode",
             self.fullscreen_switch_factory
         )
         content_layout.add_widget(option_layout_fullscreen)
         
         # Text size with explanation
         option_layout_text_size = self.create_option_layout(
-            "Tamanho do Texto", 
-            "Controla o tamanho de todos os textos no jogo",
+            "Text Size", 
+            "Control the size of all text in the game",
             self.text_size_slider_factory,
             is_slider=True
         )
@@ -53,24 +53,24 @@ class OptionsScreen(Screen):
         
         # Sound effects with explanation
         option_layout_sound_effects = self.create_option_layout(
-            "Efeitos Sonoros", 
-            "Ativa ou desativa os efeitos sonoros do jogo",
+            "Sound Effects", 
+            "Enable or disable game sound effects",
             self.sound_effects_switch_factory
         )
         content_layout.add_widget(option_layout_sound_effects)
         
         # Music with explanation
         option_layout_music = self.create_option_layout(
-            "Música", 
-            "Ativa ou desativa a música de fundo do jogo",
+            "Music", 
+            "Enable or disable background music",
             self.music_switch_factory
         )
         content_layout.add_widget(option_layout_music)
         
         # Music volume with explanation
         option_layout_music_volume = self.create_option_layout(
-            "Volume da Música", 
-            "Controla o volume da música de fundo",
+            "Music Volume", 
+            "Control the volume of background music",
             self.music_volume_slider_factory,
             is_slider=True
         )
@@ -78,8 +78,8 @@ class OptionsScreen(Screen):
         
         # Casual Mode - replaces separate score and timer options
         option_layout_casual_mode = self.create_option_layout(
-            "Modo Casual", 
-            "Quando ativado, desativa a pontuação e o temporizador para uma experiência mais relaxante",
+            "Casual Mode", 
+            "When enabled, disables scoring and timer for a more relaxed experience",
             self.casual_mode_switch_factory
         )
         content_layout.add_widget(option_layout_casual_mode)
@@ -92,7 +92,7 @@ class OptionsScreen(Screen):
         
         # Save button
         save_btn = Button(
-            text="Salvar Alterações",
+            text="Save Changes",
             font_size=self.get_font_size(32),
             background_color=(0, 0.7, 0, 1)
         )
@@ -101,7 +101,7 @@ class OptionsScreen(Screen):
         
         # Back button
         back_btn = Button(
-            text="Voltar",
+            text="Back",
             font_size=self.get_font_size(32),
             background_color=(0.5, 0, 0, 1)
         )

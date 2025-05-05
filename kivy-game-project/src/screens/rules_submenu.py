@@ -16,20 +16,27 @@ class RulesSubmenu(Screen):
 
         self.layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
-        self.title = Label(text="Regras", font_size=74, size_hint=(1, 0.2))
+        self.title = Label(
+            text="Rules",
+            font_size=60,  # Hardcoded font size
+            size_hint=(1, 0.15),
+            halign='center',
+            valign='middle'
+        )
         self.layout.add_widget(self.title)
         
         self.buttons = [
-            ("Como Jogar", self.show_how_to_play),
-            ("Estrutura do Jogo", self.show_game_structure),
-            ("Voltar", self.go_back)
+            ("How to Play", self.show_how_to_play),
+            ("Game Structure", self.show_game_structure),
+            ("Back", self.go_back)
         ]
         
         for text, callback in self.buttons:
-            if text == "Voltar":
-                btn = Button(text=text, size_hint=(1, 0.2), background_color=(1, 0, 0, 1))  # Changed to red
-            else:
-                btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
+            btn = Button(
+                text=text,
+                size_hint=(1, 0.2),
+                background_color=(0, 0.5, 0, 1)
+            )
             btn.bind(on_release=callback)
             self.layout.add_widget(btn)
         
@@ -48,3 +55,10 @@ class RulesSubmenu(Screen):
     
     def go_back(self, instance):
         self.manager.current = 'main_menu'
+
+    def update_font_size(self, font_size_factor):
+        """Update font sizes dynamically based on the font size factor."""
+        self.title.font_size = 60 * font_size_factor
+        for btn in self.layout.children:
+            if isinstance(btn, Button):
+                btn.font_size = 32 * font_size_factor

@@ -18,7 +18,7 @@ from pathlib import Path
 from kivy.metrics import dp
 from kivy.uix.floatlayout import FloatLayout
 
-# Carrega o arquivo .kv
+# Load the .kv file
 from kivy.lang import Builder
 kv_file = Path(__file__).parent / 'game_screen.kv'
 # Removed the line that loads the KV file since it is missing and not required for the current functionality.
@@ -41,12 +41,12 @@ def find_project_root():
     return os.path.join('C:', os.sep, 'Users', username, 'Documents', 'GitHub', 'IPC')
 
 def get_card_back_path():
-    """Retorna o caminho para a carta traseira azul"""
+    """Returns the path to the blue card back"""
     project_root = find_project_root()
     return os.path.join(project_root, "Items_Jogo", "Parte_Traseira_Cartas", "cardBack_blue3.png")
 
 def get_wood_texture_path():
-    """Retorna o caminho para a textura de madeira"""
+    """Returns the path to the wood texture"""
     project_root = find_project_root()
     return os.path.join(project_root, "Items_Jogo", "Icons", "wood_sign.png")
 
@@ -86,7 +86,7 @@ class GameScreen(Screen):
 
         # Timer Label
         self.timer_label = Label(
-            text="Tempo: 0s", 
+            text="Time: 0s", 
             size_hint=(0.4, None), 
             height=dp(50),  # Increased height for larger font
             font_size='24sp',  # Increased font size
@@ -121,7 +121,7 @@ class GameScreen(Screen):
             padding=[10, 5],
         )
         self.reveal_button = Button(
-            text="Revelar Cartas", 
+            text="Reveal Cards", 
             size_hint=(None, 0.8), # size_hint_x=None, adjust height if needed
             width=dp(200), # Give it a fixed width or calculate based on text
             pos_hint={'center_x': 0.5}, # Center horizontally
@@ -139,7 +139,7 @@ class GameScreen(Screen):
         # Add main layout to the screen
         self.add_widget(self.main_layout)
         
-        # Inicialização de variáveis
+        # Initialization of variables
         self.cards = []
         self.selected_cards = []
         self.is_checking = False
@@ -151,22 +151,22 @@ class GameScreen(Screen):
         self.sounds = {}
         self.card_back_path = get_card_back_path()
         
-        # Configuração do timer
+        # Timer configuration
         self.elapsed_time = 0
         self.timer_event = None
         
-        # Configuração do score
+        # Score configuration
         self.score = 0
-        self.lives = 3
+        self.lives = 0  # No longer used
         
-        # Configuração do grid
+        # Grid configuration
         self.grid_cols = 4
         self.grid_rows = 4
         
-        # Bind para redimensionamento da janela
+        # Bind for window resize
         Window.bind(on_resize=self.on_window_resize)
         
-        # Atualização das configurações e layout inicial
+        # Update settings and initial layout
         self.update_settings()
         # Call update_card_layout once initially after widgets are created
         Clock.schedule_once(lambda dt: self.update_card_layout()) 
@@ -211,41 +211,41 @@ class GameScreen(Screen):
             self.reveal_button.disabled = True
     
     def apply_theme(self, theme, num_cards):
-        # Limpa o grid atual
+        # Clear the current grid
         self.game_grid.clear_widgets()
         
-        # Inicia o novo jogo
+        # Start the new game
         self.cards = start_game(theme, num_cards)
         self.current_theme = theme
         self.current_difficulty = num_cards
         
-        # Calcula o layout ótimo
+        # Calculate the optimal layout
         optimal_cols, card_width, card_height = self.calculate_optimal_grid(len(self.cards))
         self.game_grid.cols = optimal_cols
         
-        # Limpa as cartas selecionadas
+        # Clear selected cards
         self.selected_cards = []
         
-        # Adiciona os botões das cartas
+        # Add card buttons
         for card in self.cards:
             self.game_grid.add_widget(self.create_card_button(card, card_width, card_height))
         
-        # Configura os sons
+        # Configure sounds for the current theme
         self.setup_sounds(theme)
         
-        # Reseta o jogo
+        # Reset the game
         self.reset_game()
     
     def reset_game(self):
         """Resets the game state, including Easy Mode usage."""
         self.score = 0
-        self.lives = 3
+        self.lives = 0  # No longer used
         self.easy_mode_used = False  # Reset Easy Mode usage
         self.consecutive_matches = 0
         self.multiplier = 1
 
         # Update the HUD
-        self.score_label.text = "Score: 0"
+        self.score_label.text = f"Score: {self.score}"
 
         # Reset and start the timer
         self.stop_timer()
@@ -257,7 +257,7 @@ class GameScreen(Screen):
             self.reveal_button.disabled = False
     
     def setup_sounds(self, theme):
-        """Configura os sons para o tema atual"""
+        """Configure sounds for the current theme"""
         project_root = find_project_root()
         sound_folder = None
         
@@ -268,13 +268,13 @@ class GameScreen(Screen):
         else:
             sound_folder = os.path.join(project_root, "Items_Jogo", "audios_wav_animais")
         
-        # Limpa sons anteriores
+        # Clear previous sounds
         for sound in self.sounds.values():
             if sound:
                 sound.unload()
         self.sounds.clear()
         
-        # Carrega novos sons
+        # Load new sounds
         for card in self.cards:
             base_filename = os.path.basename(card["image"])
             sound_path = os.path.join(sound_folder, base_filename.replace(".png", ".wav"))
@@ -293,7 +293,7 @@ class GameScreen(Screen):
         
         # Calculate space available for cards
         available_width = screen_width - 40
-        available_height = screen_height * 0.8  # 80% da altura da tela
+        available_height = screen_height * 0.8  # 80% of screen height
         
         # Use the predefined grid size or calculate optimal
         cols = self.grid_cols if hasattr(self, 'grid_cols') else math.ceil(math.sqrt(num_cards))
@@ -357,7 +357,7 @@ class GameScreen(Screen):
             return
         
         # Always update the label text immediately when starting/resuming
-        self.timer_label.text = f"Tempo: {self.elapsed_time}s"
+        self.timer_label.text = f"Time: {self.elapsed_time}s"
         
         # Schedule the interval only if it's not already running
         if self.timer_event is None: 
@@ -367,7 +367,7 @@ class GameScreen(Screen):
         if not self.timer_display:
             return
         self.elapsed_time += 1
-        self.timer_label.text = f"Tempo: {self.elapsed_time}s"
+        self.timer_label.text = f"Time: {self.elapsed_time}s"
     
     def stop_timer(self):
         if not self.timer_display:
@@ -443,11 +443,11 @@ class GameScreen(Screen):
             if self.score_display:
                 self.score_label.text = f"Score: {self.score}"
             
-            # Solução simplificada: Apenas verifique se este é o último par
+            # Simplified solution: Just check if this is the last pair
             total_pairs = len(self.cards) // 2
             matched_pairs = sum(1 for card in self.cards if card["matched"]) // 2
             
-            # Se NÃO for o último par (ainda falta pelo menos um par), mostre a tela de match
+            # If NOT the last pair (at least one pair is still missing), show the match screen
             if matched_pairs < total_pairs:
                 match_screen = self.manager.get_screen('match_screen')
                 match_screen.show_match()
@@ -458,12 +458,9 @@ class GameScreen(Screen):
         else:
             self.consecutive_matches = 0
             self.multiplier = 1
-            if self.lives > 0:
-                self.lives -= 1
-            else:
-                self.score = max(self.score - 1, 0)  # Ensure score does not go below zero
-                if self.score_display:
-                    self.score_label.text = f"Score: {self.score}"
+            self.score = max(self.score, 0)  # Score remains non-negative
+            if self.score_display:
+                self.score_label.text = f"Score: {self.score}"
             
             # Turn cards back to face down immediately - no animation
             for widget, card in self.selected_cards:
@@ -478,7 +475,7 @@ class GameScreen(Screen):
         
         # Check win condition and ensure we transition to win screen
         if check_win_condition(self.cards):
-            print("Condição de vitória encontrada! A parar o relógio e a dar display da victory screen.")
+            print("Win condition met! Stopping the clock and displaying the victory screen.")
             self.stop_timer()
             self.show_win_screen()
     
@@ -551,11 +548,11 @@ class GameScreen(Screen):
         pass  # Removed the functionality for the 'Voltar' button
 
     def set_grid_size(self, grid_size):
-        """Define o tamanho do grid (colunas x linhas)"""
+        """Set the grid size (columns x rows)"""
         self.grid_cols, self.grid_rows = grid_size
         self.game_grid.cols = self.grid_cols
         self.update_card_layout()
 
     def get_wood_texture_path(self):
-        """Retorna o caminho para a textura de madeira"""
+        """Returns the path to the wood texture"""
         return self.wood_texture_path

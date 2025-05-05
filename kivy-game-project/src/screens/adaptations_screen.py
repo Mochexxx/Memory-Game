@@ -18,7 +18,7 @@ class AdaptationsScreen(Screen):
         
         # Title with dynamic font size
         title = Label(
-            text="Opções de Acessibilidade",
+            text="Accessibility Options",
             font_size=self.get_font_size(60),
             size_hint=(1, 0.15),
             halign='center',
@@ -34,40 +34,40 @@ class AdaptationsScreen(Screen):
         
         # Colorblind mode with explanation
         option_layout1 = self.create_option_layout(
-            "Modo Daltonismo", 
-            "Aumenta o contraste e usa cores adequadas para daltonismo",
+            "Colorblind Mode", 
+            "Increases contrast and uses colorblind-friendly palettes",
             self.colorblind_switch_factory
         )
         content_layout.add_widget(option_layout1)
         
         # Audio assistance with explanation
         option_layout2 = self.create_option_layout(
-            "Assistência por Áudio", 
-            "Fornece dicas sonoras e narração para jogadores com deficiência visual",
+            "Audio Assistance", 
+            "Provides sound cues and narration for visually impaired players",
             self.audio_assist_switch_factory
         )
         content_layout.add_widget(option_layout2)
         
         # Visual feedback with explanation
         option_layout3 = self.create_option_layout(
-            "Feedback Visual", 
-            "Mostra dicas visuais e animações para jogadores com deficiência auditiva",
+            "Visual Feedback", 
+            "Displays visual cues and animations for hearing-impaired players",
             self.visual_feedback_switch_factory
         )
         content_layout.add_widget(option_layout3)
         
         # Easy mode with explanation
         option_layout_easy_mode = self.create_option_layout(
-            "Modo Fácil", 
-            "Permite revelar todas as cartas uma vez por jogo",
+            "Easy Mode", 
+            "Allows revealing all cards once per game",
             self.easy_mode_switch_factory
         )
         content_layout.add_widget(option_layout_easy_mode)
         
         # Text size scaling with explanation
         option_layout_text_size_scaling = self.create_option_layout(
-            "Escala do Tamanho do Texto", 
-            "Ajusta o tamanho do texto em todo o jogo",
+            "Text Size Scaling", 
+            "Adjusts text size throughout the game",
             self.text_size_scaling_slider_factory,
             is_slider=True
         )
@@ -81,7 +81,7 @@ class AdaptationsScreen(Screen):
         
         # Save button
         save_btn = Button(
-            text="Salvar Alterações",
+            text="Save Changes",
             font_size=self.get_font_size(32),
             background_color=(0, 0.7, 0, 1)
         )
@@ -90,7 +90,7 @@ class AdaptationsScreen(Screen):
         
         # Back button
         back_btn = Button(
-            text="Voltar",
+            text="Back",
             font_size=self.get_font_size(32),
             background_color=(0.5, 0, 0, 1)
         )

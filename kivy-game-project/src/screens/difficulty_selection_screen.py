@@ -13,7 +13,7 @@ class DifficultySelectionScreen(Screen):
         
         # Title
         title = Label(
-            text="Seleção de Dificuldade",
+            text="Difficulty Selection",
             font_size=74,
             size_hint=(1, 0.2),
             halign='center',
@@ -27,7 +27,7 @@ class DifficultySelectionScreen(Screen):
         # Seção Fácil
         easy_section = BoxLayout(orientation='vertical', spacing=dp(10))
         easy_label = Label(
-            text="Fácil",
+            text="Easy",
             font_size=dp(40),
             size_hint=(1, 0.2),
             halign='center',
@@ -54,7 +54,7 @@ class DifficultySelectionScreen(Screen):
         # Seção Médio
         medium_section = BoxLayout(orientation='vertical', spacing=dp(10))
         medium_label = Label(
-            text="Médio",
+            text="Medium",
             font_size=dp(40),
             size_hint=(1, 0.2),
             halign='center',
@@ -81,7 +81,7 @@ class DifficultySelectionScreen(Screen):
         # Seção Difícil
         hard_section = BoxLayout(orientation='vertical', spacing=dp(10))
         hard_label = Label(
-            text="Difícil",
+            text="Hard",
             font_size=dp(40),
             size_hint=(1, 0.2),
             halign='center',
@@ -114,7 +114,7 @@ class DifficultySelectionScreen(Screen):
         
         # Botão Voltar
         back_btn = Button(
-            text="Voltar",
+            text="Back",
             size_hint=(1, 0.1),
             background_color=(0.5, 0, 0, 1),
             font_size=dp(32)

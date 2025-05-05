@@ -49,7 +49,7 @@ class BestTimesScoresTable(BoxLayout):
 
         # Placeholder rows for difficulties
         self.difficulty_rows = {}
-        difficulties = ["Fácil", "Médio", "Difícil"]
+        difficulties = ["Easy", "Medium", "Hard"]
 
         for difficulty in difficulties:
             row = BoxLayout(orientation='horizontal', size_hint=(1, None), height=dp(30))
@@ -131,8 +131,10 @@ class BestTimesScoresTable(BoxLayout):
                 best_time = min((stats['best_times'].get(key, float('inf')) for key in keys), default=float('inf'))
                 best_score = max((stats['best_score'] for key in keys), default=0)
 
-                best_time_label.text = "-" if best_time == float('inf') else f"{best_time}s"
-                best_score_label.text = str(best_score)
+               
+
+                best_time_label.text = "-" if best_time == float('inf') else f"{best_time}"
+                
 
             print("Table updated successfully")
         except Exception as e:
