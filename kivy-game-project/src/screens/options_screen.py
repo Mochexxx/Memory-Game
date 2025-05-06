@@ -225,6 +225,15 @@ class OptionsScreen(Screen):
         if hasattr(app, 'settings'):
             app.settings['text_size_factor'] = value
             save_settings(app.settings)
+            
+            # Apply the font size change to all screens with update_font_size method
+            if hasattr(app, 'root') and hasattr(app.root, 'screen_manager'):
+                sm = app.root.screen_manager
+                for screen_name in sm.screen_names:
+                    screen = sm.get_screen(screen_name)
+                    if hasattr(screen, 'update_font_size'):
+                        screen.update_font_size(value)
+                        
         print(f"Text size factor: {value}")
     
     def on_sound_effects_toggle(self, instance, value):
