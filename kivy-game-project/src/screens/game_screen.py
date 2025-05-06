@@ -73,14 +73,15 @@ class GameScreen(Screen):
         self.score_label = Label(
             text="Score: 0", 
             size_hint=(0.4, None), 
-            height=dp(50),  # Increased height for larger font
-            font_size='24sp',  # Increased font size
+            height=dp(60),  # Increased height for larger font
+            font_size='32sp',  # Increased font size from 24sp to 32sp
             font_name='Roboto-Bold',  # Use a wider and bolder font
             pos_hint={'x': 0.05, 'top': 0.95}, 
             opacity=1, 
             disabled=False,
             halign='left', 
-            valign='top'
+            valign='top',
+            color=(0.0, 0.0, 0.5, 1)  # Dark blue color
         )
         self.score_label.bind(size=self.score_label.setter('text_size'))
 
@@ -88,14 +89,15 @@ class GameScreen(Screen):
         self.timer_label = Label(
             text="Time: 0s", 
             size_hint=(0.4, None), 
-            height=dp(50),  # Increased height for larger font
-            font_size='24sp',  # Increased font size
+            height=dp(60),  # Increased height for larger font
+            font_size='32sp',  # Increased font size from 24sp to 32sp
             font_name='Roboto-Bold',  # Use a wider and bolder font
             pos_hint={'right': 0.95, 'top': 0.95}, 
             opacity=1, 
             disabled=False,
             halign='right', 
-            valign='top'
+            valign='top',
+            color=(0.0, 0.0, 0.5, 1)  # Dark blue color
         )
         self.timer_label.bind(size=self.timer_label.setter('text_size'))
 
@@ -267,6 +269,8 @@ class GameScreen(Screen):
 
         # Reset and start the timer
         self.stop_timer()
+        self.elapsed_time = 0  # Reset the timer to zero
+        self.timer_label.text = f"Time: {self.elapsed_time}s"  # Update the timer display immediately
         self.start_timer()
 
         # Re-enable the reveal button if Easy Mode is active

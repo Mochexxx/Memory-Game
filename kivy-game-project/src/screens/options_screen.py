@@ -10,7 +10,38 @@ from kivy.app import App
 from kivy.metrics import dp
 from kivy.core.window import Window
 from kivy.clock import Clock
+from kivy.graphics import Color, Rectangle
 from utils.settings_manager import save_settings
+
+class BackgroundLabel(Label):
+    """Label class without background - we'll use the container background instead"""
+    def __init__(self, **kwargs):
+        super(BackgroundLabel, self).__init__(**kwargs)
+
+class BorderedScrollContainer(BoxLayout):
+    """A container with a dark border for the scrollable content"""
+    def __init__(self, **kwargs):
+        super(BorderedScrollContainer, self).__init__(**kwargs)
+        with self.canvas.before:
+            # Dark border color
+            Color(0, 0.15, 0, 1)  # Very dark green for the border
+            self.border = Rectangle(pos=self.pos, size=self.size)
+            # Background color (slightly lighter)
+            Color(0, 0.2, 0, 0.8)  # Dark green background
+            # Inner rectangle (smaller by the border width)
+            border_width = 3
+            self.background = Rectangle(
+                pos=(self.pos[0] + border_width, self.pos[1] + border_width),
+                size=(self.size[0] - 2*border_width, self.size[1] - 2*border_width)
+            )
+        self.bind(pos=self.update_canvas, size=self.update_canvas)
+    
+    def update_canvas(self, *args):
+        border_width = 3
+        self.border.pos = self.pos
+        self.border.size = self.size
+        self.background.pos = (self.pos[0] + border_width, self.pos[1] + border_width)
+        self.background.size = (self.size[0] - 2*border_width, self.size[1] - 2*border_width)
 
 class OptionsScreen(Screen):
     def __init__(self, **kwargs):
@@ -30,8 +61,11 @@ class OptionsScreen(Screen):
         title.bind(size=self.update_text_size)
         main_layout.add_widget(title)
         
+        # Create a bordered container for scrollable content
+        bordered_container = BorderedScrollContainer(size_hint=(1, 0.7))
+        
         # Create a scrollable content area
-        scroll_view = ScrollView(size_hint=(1, 0.7), do_scroll_x=False)
+        scroll_view = ScrollView(size_hint=(1, 1), do_scroll_x=False)
         content_layout = BoxLayout(orientation='vertical', spacing=dp(15), padding=dp(10), size_hint_y=None)
         content_layout.bind(minimum_height=content_layout.setter('height'))
         
@@ -86,7 +120,8 @@ class OptionsScreen(Screen):
         content_layout.add_widget(option_layout_casual_mode)
         
         scroll_view.add_widget(content_layout)
-        main_layout.add_widget(scroll_view)
+        bordered_container.add_widget(scroll_view)
+        main_layout.add_widget(bordered_container)
         
         # Buttons layout
         buttons_layout = BoxLayout(orientation='horizontal', spacing=dp(20), size_hint=(1, 0.15))
@@ -124,7 +159,7 @@ class OptionsScreen(Screen):
         header_box = BoxLayout(orientation='horizontal', size_hint_y=0.6)
         
         # Title
-        title_label = Label(
+        title_label = BackgroundLabel(
             text=title_text,
             font_size=self.get_font_size(28),
             halign='left',
@@ -143,7 +178,7 @@ class OptionsScreen(Screen):
         option_box.add_widget(header_box)
         
         # Description
-        desc_label = Label(
+        desc_label = BackgroundLabel(
             text=description_text,
             font_size=self.get_font_size(18),
             halign='left',

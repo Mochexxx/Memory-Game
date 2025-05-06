@@ -38,7 +38,7 @@ class MainMenu(Screen):
             text="Memory Game",
             font_size=dp(120),  # Much larger fixed size
             size_hint=(1, 0.25),  # Larger size hint
-            color=(0.9, 0.2, 0.2, 1),  # Bright red color to make it stand out
+            color=(1, 1, 1, 1),  # Pure white color
             bold=True,
             halign='center',
             valign='middle'
