@@ -33,8 +33,8 @@ class ThemeSelectionScreen(Screen):
         
         layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
-        title = Label(text="Theme Selection", font_size=74, size_hint=(1, 0.2))
-        layout.add_widget(title)
+        self.title = Label(text="Theme Selection", font_size=74, size_hint=(1, 0.2))
+        layout.add_widget(self.title)
         
         # Adjust layout for smaller and more organized buttons
         grid_layout = BoxLayout(orientation='horizontal', spacing=20, size_hint=(1, 0.6))
@@ -45,6 +45,7 @@ class ThemeSelectionScreen(Screen):
             ("Number Theme", self.select_theme_numbers, os.path.join(project_root, "Items_Jogo", "baralho_numeros"))
         ]
 
+        self.theme_buttons = []
         # Adjust layout for smaller buttons with reduced width and centered alignment
         for text, callback, theme in themes:
             btn = ToggleButton(
@@ -56,21 +57,34 @@ class ThemeSelectionScreen(Screen):
             )
             btn.bind(on_release=lambda instance, cb=callback, th=theme: cb(instance, th))
             layout.add_widget(btn)
+            self.theme_buttons.append(btn)
 
         layout.add_widget(grid_layout)
 
         # Adjust back button to be smaller and centered
-        back_btn = ToggleButton(
+        self.back_btn = ToggleButton(
             text="Back",
             size_hint=(0.5, 0.1),  # Reduced width
             pos_hint={'center_x': 0.5},  # Center horizontally
             background_color=(0.5, 0, 0, 1),
             group='theme'
         )
-        back_btn.bind(on_release=lambda instance: self.go_back(instance, None))
-        layout.add_widget(back_btn)
+        self.back_btn.bind(on_release=lambda instance: self.go_back(instance, None))
+        layout.add_widget(self.back_btn)
         
         self.add_widget(layout)
+    
+    def update_font_size(self, font_size_factor):
+        """Update font sizes dynamically based on the font size factor."""
+        # Update title font size
+        self.title.font_size = 74 * font_size_factor * 0.7
+        
+        # Update theme button font sizes
+        for btn in self.theme_buttons:
+            btn.font_size = 32 * font_size_factor * 0.7
+        
+        # Update back button font size
+        self.back_btn.font_size = 24 * font_size_factor * 0.7
     
     def select_theme_animals(self, instance, theme):
         self.selected_theme = theme

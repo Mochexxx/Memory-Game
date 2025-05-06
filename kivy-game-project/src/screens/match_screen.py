@@ -11,7 +11,7 @@ class MatchScreen(Screen):
         layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
         self.match_label = Label(
-            text="Par!",
+            text="Pair!",
             font_size=74,
             size_hint=(1, 0.5),
             halign='center',

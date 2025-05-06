@@ -153,6 +153,25 @@ class MemoryGameApp(App):
 
         return False  # Allow other keys to function normally
     
+    def apply_text_size_to_all_screens(self):
+        """Apply the current text size setting to all screens"""
+        if hasattr(self, 'root') and hasattr(self.root, 'screen_manager'):
+            # Get the current text size factor from settings and cap it at maximum value
+            font_size_factor = self.settings.get('text_size_factor', 1.0)
+            font_size_factor = min(font_size_factor, 1.5)  # Cap at maximum value
+            
+            # Update the settings with the capped value
+            self.settings['text_size_factor'] = font_size_factor
+            
+            print(f"Applying text size factor {font_size_factor} to all screens")
+            
+            # Apply to all screens that support it
+            sm = self.root.screen_manager
+            for screen_name in sm.screen_names:
+                screen = sm.get_screen(screen_name)
+                if hasattr(screen, 'update_font_size'):
+                    screen.update_font_size(font_size_factor)
+    
     def on_start(self):
         """Called when the application starts"""
         # Import here to avoid circular imports
@@ -164,6 +183,10 @@ class MemoryGameApp(App):
             print(f"Loaded player statistics: {len(stats)} records")
         except Exception as e:
             print(f"Error loading statistics: {e}")
+            
+        # Schedule applying text size to all screens once the app is fully loaded
+        # This ensures all screens are created and ready
+        Clock.schedule_once(lambda dt: self.apply_text_size_to_all_screens(), 0.5)
     
     def build(self):
         # Create a root layout that will contain the background and screen manager

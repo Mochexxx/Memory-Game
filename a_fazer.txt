@@ -1,6 +1,1 @@
-Colorblind Mode: Implement color adjustments for colorblind players.
-Audio Assistance: Add audio cues or narration for visually impaired players.
-Visual Feedback: Provide enhanced visual cues for hearing-impaired players.
-Dynamic Font Scaling: Allow players to customize text size.
 
-Back Button Navigation: Test navigation flow for consistency.

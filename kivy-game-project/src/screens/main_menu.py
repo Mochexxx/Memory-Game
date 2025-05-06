@@ -5,12 +5,15 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.label import Label
 from widgets.stats_display import StatsDisplay
+from kivy.metrics import dp
 
 class MainMenu(Screen):
     def __init__(self, **kwargs):
         super(MainMenu, self).__init__(**kwargs)
         self.main_layout = None
         self.stats_display = None
+        self.game_logo = None  # Reference to the game logo
+        self.buttons = []
         # Removed best_times_scores_table
         self.setup_ui()
 
@@ -30,10 +33,19 @@ class MainMenu(Screen):
             pos_hint={'x': 0.05, 'center_y': 0.5}
         )
         
-        title = Label(text="Memory Game", font_size=74, size_hint=(1, 0.2))
-        menu_layout.add_widget(title)
+        # Create a bigger logo that won't be affected by the text size slider
+        self.game_logo = Label(
+            text="Memory Game",
+            font_size=dp(120),  # Much larger fixed size
+            size_hint=(1, 0.25),  # Larger size hint
+            color=(0.9, 0.2, 0.2, 1),  # Bright red color to make it stand out
+            bold=True,
+            halign='center',
+            valign='middle'
+        )
+        menu_layout.add_widget(self.game_logo)
         
-        buttons = [
+        button_definitions = [
             ("Start Game", self.start_game),
             ("Options", self.show_options),
             ("Adaptations", self.show_adaptations),
@@ -41,10 +53,12 @@ class MainMenu(Screen):
             ("Quit", self.quit_game)
         ]
         
-        for text, callback in buttons:
-            btn = Button(text=text, size_hint=(1, 0.2), background_color=(0, 0.5, 0, 1))
+        self.buttons = []
+        for text, callback in button_definitions:
+            btn = Button(text=text, size_hint=(1, 0.15), background_color=(0, 0.5, 0, 1))
             btn.bind(on_release=callback)
             menu_layout.add_widget(btn)
+            self.buttons.append(btn)
         
         self.main_layout.add_widget(menu_layout)
         
@@ -56,6 +70,18 @@ class MainMenu(Screen):
         self.main_layout.add_widget(self.stats_display)
         
         self.add_widget(self.main_layout)
+    
+    def update_font_size(self, font_size_factor):
+        """Update font sizes dynamically based on the font size factor."""
+        # Do NOT update the game logo font size - it stays fixed
+        
+        # Update button font sizes
+        for btn in self.buttons:
+            btn.font_size = 32 * font_size_factor * 0.7
+        
+        # Update stats display if it implements update_font_size
+        if self.stats_display and hasattr(self.stats_display, 'update_font_size'):
+            self.stats_display.update_font_size(font_size_factor)
     
     def on_enter(self):
         """Called when the screen is entered"""

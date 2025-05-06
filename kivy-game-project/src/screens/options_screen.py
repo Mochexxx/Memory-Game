@@ -9,6 +9,7 @@ from kivy.uix.slider import Slider
 from kivy.app import App
 from kivy.metrics import dp
 from kivy.core.window import Window
+from kivy.clock import Clock
 from utils.settings_manager import save_settings
 
 class OptionsScreen(Screen):
@@ -202,7 +203,17 @@ class OptionsScreen(Screen):
         app = App.get_running_app()
         if hasattr(app, 'settings'):
             self.fullscreen_switch.active = app.settings.get('fullscreen', Window.fullscreen)
-            self.text_size_slider.value = app.settings.get('text_size_factor', 1.0)
+            
+            # Cap the text size factor to the maximum allowed value (1.5)
+            text_size_factor = app.settings.get('text_size_factor', 1.0)
+            text_size_factor = min(text_size_factor, 1.5)  # Cap at maximum value
+            
+            # Update the app settings with the capped value to prevent future issues
+            app.settings['text_size_factor'] = text_size_factor
+            
+            # Set the slider value
+            self.text_size_slider.value = text_size_factor
+            
             self.sound_effects_switch.active = app.settings.get('sound_effects', True)
             self.music_switch.active = app.settings.get('music', True)
             self.music_volume_slider.value = app.settings.get('music_volume', 0.5)
@@ -223,18 +234,52 @@ class OptionsScreen(Screen):
     def on_text_size_change(self, instance, value):
         app = App.get_running_app()
         if hasattr(app, 'settings'):
+            # Update the app's settings value immediately
             app.settings['text_size_factor'] = value
-            save_settings(app.settings)
             
-            # Apply the font size change to all screens with update_font_size method
+            # First update the current screen to ensure immediate feedback
             if hasattr(app, 'root') and hasattr(app.root, 'screen_manager'):
                 sm = app.root.screen_manager
+                
+                # Update current screen first for immediate visual feedback
+                current_screen = sm.current_screen
+                if hasattr(current_screen, 'update_font_size'):
+                    current_screen.update_font_size(value)
+                
+                # Also update all other screens for when they become visible
                 for screen_name in sm.screen_names:
                     screen = sm.get_screen(screen_name)
-                    if hasattr(screen, 'update_font_size'):
+                    if screen != current_screen and hasattr(screen, 'update_font_size'):
                         screen.update_font_size(value)
+                
+                # Update the options screen itself (any labels that need updating)
+                self.update_option_labels(value)
+            
+            # Save settings immediately with throttling to avoid excessive disk writes
+            if not hasattr(self, '_last_save_time') or Clock.get_time() - self._last_save_time > 0.5:
+                save_settings(app.settings)
+                self._last_save_time = Clock.get_time()
                         
         print(f"Text size factor: {value}")
+        
+    def update_option_labels(self, value):
+        """Update labels in the options screen itself."""
+        # Find and update all labels in the options screen
+        def update_labels_in_widget(widget):
+            if isinstance(widget, Label):
+                if hasattr(widget, 'base_font_size'):
+                    widget.font_size = widget.base_font_size * value * 0.7
+                else:
+                    # First time, store the original size
+                    widget.base_font_size = widget.font_size / (value * 0.7)
+                    widget.font_size = widget.base_font_size * value * 0.7
+            elif hasattr(widget, 'children'):
+                for child in widget.children:
+                    update_labels_in_widget(child)
+        
+        # Start from the root widget of this screen
+        for child in self.children:
+            update_labels_in_widget(child)
     
     def on_sound_effects_toggle(self, instance, value):
         app = App.get_running_app()
