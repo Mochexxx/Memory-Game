@@ -547,8 +547,7 @@ class GameScreen(Screen):
         # Display score and time based on settings
         if self.score_display:
             win_screen.display_score(self.score)
-        
-        # Important: Ensure all changes to the win screen are done before switching to it
+          # Important: Ensure all changes to the win screen are done before switching to it
         win_screen.update_labels_visibility()
         
         # Switch to win screen directly
@@ -557,7 +556,7 @@ class GameScreen(Screen):
     def on_leave(self):
         # Stop the timer when leaving the game screen
         self.stop_timer()
-
+        
     def reveal_cards(self, instance):
         if self.easy_mode_used:
             return  # Prevent multiple uses
@@ -566,21 +565,32 @@ class GameScreen(Screen):
         self.reveal_button.disabled = True
         self.reveal_button.opacity = 0 # Make button disappear after use
 
+        # Create a mapping of widgets to cards to ensure consistency
+        # Kivy's children list is in reverse order of how widgets were added
+        widgets_to_cards = list(zip(reversed(self.game_grid.children), self.cards))
+
         # Reveal all cards immediately - no animation
-        for card, widget in zip(self.cards, self.game_grid.children):
+        for widget, card in widgets_to_cards:
             card["flipped"] = True
             widget.background_normal = card["image"]
             widget.background_down = card["image"]
 
+        # Store the mapping for hide_cards to use
+        self._widgets_to_cards = widgets_to_cards
+        
         # Schedule to hide cards after 2 seconds
         Clock.schedule_once(self.hide_cards, 2)
 
     def hide_cards(self, dt):
-        for card, widget in zip(self.cards, self.game_grid.children):
-            if not card["matched"]:  # Only hide unmatched cards
-                card["flipped"] = False
-                widget.background_normal = self.card_back_path
-                widget.background_down = self.card_back_path
+        # Use the same widget-to-card mapping created in reveal_cards
+        if hasattr(self, '_widgets_to_cards'):
+            for widget, card in self._widgets_to_cards:
+                if not card["matched"]:  # Only hide unmatched cards
+                    card["flipped"] = False
+                    widget.background_normal = self.card_back_path
+                    widget.background_down = self.card_back_path
+            # Clean up the mapping to avoid memory leaks
+            del self._widgets_to_cards
     
     def go_back(self, instance):
         pass  # Removed the functionality for the 'Voltar' button
