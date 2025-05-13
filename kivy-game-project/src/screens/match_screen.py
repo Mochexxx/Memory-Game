@@ -36,7 +36,7 @@ class MatchScreen(Screen):
         popup_layout.bind(pos=self.update_rect, size=self.update_rect)
         
         self.popup_label = Label(
-            text="Par!",
+            text="Pair!",
             font_size=60,
             color=(1, 1, 1, 1)
         )
