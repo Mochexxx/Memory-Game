@@ -3,6 +3,33 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
 from kivy.app import App
+from kivy.graphics import Color, Rectangle
+
+class BackgroundLabel(Label):
+    """Label class without background - we'll use the container background instead"""
+    def __init__(self, **kwargs):
+        super(BackgroundLabel, self).__init__(**kwargs)
+
+class BorderedScrollContainer(BoxLayout):
+    """A container with a dark border for the scrollable content"""
+    def __init__(self, **kwargs):
+        super(BorderedScrollContainer, self).__init__(**kwargs)
+        with self.canvas.before:
+            Color(0, 0.15, 0, 1)  # Very dark green for the border
+            self.border = Rectangle(pos=self.pos, size=self.size)
+            Color(0, 0.2, 0, 0.8)  # Dark green background
+            border_width = 3
+            self.background = Rectangle(
+                pos=(self.pos[0] + border_width, self.pos[1] + border_width),
+                size=(self.size[0] - 2*border_width, self.size[1] - 2*border_width)
+            )
+        self.bind(pos=self.update_canvas, size=self.update_canvas)
+    def update_canvas(self, *args):
+        border_width = 3
+        self.border.pos = self.pos
+        self.border.size = self.size
+        self.background.pos = (self.pos[0] + border_width, self.pos[1] + border_width)
+        self.background.size = (self.size[0] - 2*border_width, self.size[1] - 2*border_width)
 
 class WinScreen(Screen):
     def __init__(self, **kwargs):
@@ -17,47 +44,52 @@ class WinScreen(Screen):
         # Create the layout
         self.layout = BoxLayout(orientation='vertical', spacing=20, padding=50)
         
-        # Title - always visible
-        self.title_label = Label(
+        # Title container with green background
+        title_container = BorderedScrollContainer(size_hint=(1, 0.4))
+        self.title_label = BackgroundLabel(
             text="Parabéns! Você Venceu!",
             font_size=74,
-            size_hint=(1, 0.4),  # Increased size when other elements are hidden
+            size_hint=(1, 1),
             halign='center',
             valign='middle'
         )
-        self.layout.add_widget(self.title_label)
+        title_container.add_widget(self.title_label)
+        self.layout.add_widget(title_container)
         
-        # Time display container
-        self.time_container = BoxLayout(orientation='vertical', size_hint=(1, 0.3))
-        
-        # Time information
-        self.time_label = Label(
+        # Time display container with green background
+        self.time_container = BorderedScrollContainer(size_hint=(1, 0.3))
+        time_inner_layout = BoxLayout(orientation='vertical', size_hint=(1, 1))
+        self.time_label = BackgroundLabel(
             text="Seu tempo: 0s",
             font_size=48,
-            size_hint=(1, 0.5)
+            size_hint=(1, 0.5),
+            halign='center',
+            valign='middle'
         )
-        self.time_container.add_widget(self.time_label)
-        
-        # Record information
-        self.record_label = Label(
+        time_inner_layout.add_widget(self.time_label)
+        self.record_label = BackgroundLabel(
             text="",
             font_size=36,
             size_hint=(1, 0.5),
-            color=(1, 0.8, 0, 1)  # Gold color for records
-        )
-        self.time_container.add_widget(self.record_label)
-        
-        self.layout.add_widget(self.time_container)
-        
-        # Score information
-        self.score_label = Label(
-            text="",
-            font_size=32,
-            size_hint=(1, 0.2),
+            color=(1, 0.8, 0, 1),
             halign='center',
             valign='middle'
         )
-        self.layout.add_widget(self.score_label)
+        time_inner_layout.add_widget(self.record_label)
+        self.time_container.add_widget(time_inner_layout)
+        self.layout.add_widget(self.time_container)
+        
+        # Score container with green background
+        self.score_container = BorderedScrollContainer(size_hint=(1, 0.2))
+        self.score_label = BackgroundLabel(
+            text="",
+            font_size=32,
+            size_hint=(1, 1),
+            halign='center',
+            valign='middle'
+        )
+        self.score_container.add_widget(self.score_label)
+        self.layout.add_widget(self.score_container)
         
         # Buttons container - always visible
         self.buttons_layout = BoxLayout(orientation='horizontal', spacing=20, size_hint=(1, 0.3))
@@ -101,11 +133,12 @@ class WinScreen(Screen):
         """Update the visibility of time and score labels based on settings"""
         print(f"Updating labels - Show time: {self.should_display_time}, Show score: {self.should_display_score}")  # Debug print
         
+        title_container = self.layout.children[-4]  # Title container is the first added (last in children list)
         # Adjust title size based on what's visible
         if not self.should_display_time and not self.should_display_score:
-            self.title_label.size_hint_y = 0.7  # Make title bigger when other elements are hidden
+            title_container.size_hint_y = 0.7  # Make title bigger when other elements are hidden
         else:
-            self.title_label.size_hint_y = 0.4  # Normal size when other elements are visible
+            title_container.size_hint_y = 0.4  # Normal size when other elements are visible
         
         # For time label and record label container
         if self.should_display_time:
@@ -123,12 +156,13 @@ class WinScreen(Screen):
         
         # For score label
         if self.should_display_score:
-            self.score_label.opacity = 1
-            self.score_label.size_hint_y = 0.2
+            self.score_container.opacity = 1
+            self.score_container.size_hint_y = 0.2
             self.score_label.disabled = False
         else:
-            self.score_label.opacity = 0
-            self.score_label.size_hint_y = 0
+            self.score_container.opacity = 0
+            self.score_container.size_hint_y = 0
+            self.score_container.height = 0
             self.score_label.disabled = True
         
         # Always keep buttons visible
